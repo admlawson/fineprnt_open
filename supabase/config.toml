@@ -1,0 +1,29 @@
+project_id = "pezxhnhtphactsnhkvsg"
+
+[functions."ingest_upload_metadata"]
+verify_jwt = true
+
+[functions."ocr_and_annotation"]
+verify_jwt = true
+
+[functions."chunk_and_embed"]
+verify_jwt = true
+
+[functions."chat_rag"]
+verify_jwt = true
+import_map = "functions/import_map.json"
+
+[functions."stripe-webhooks"]
+verify_jwt = false
+
+[functions."stripe-portal"]
+verify_jwt = true
+
+[functions."stripe-checkout"]
+verify_jwt = true
+
+[functions."invite-user"]
+verify_jwt = true
+
+[functions."stripe-subscribe"]
+verify_jwt = true

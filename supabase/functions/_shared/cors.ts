@@ -1,0 +1,28 @@
+export const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:8080',
+  'https://c68dbad9-c9de-44cf-934e-6f3e7dabce63.lovableproject.com',
+  'https://OmniClause.com',
+  'https://www.OmniClause.com',
+];
+
+export const baseCorsHeaders = {
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+};
+
+export function buildCorsHeaders(origin?: string) {
+  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    ...baseCorsHeaders,
+    'Access-Control-Allow-Origin': allowedOrigin,
+  } as Record<string, string>;
+}
+
+export function handleCors(req: Request): Response | null {
+  if (req.method === 'OPTIONS') {
+    const origin = req.headers.get('origin') ?? undefined;
+    return new Response(null, { headers: buildCorsHeaders(origin) });
+  }
+  return null;
+}

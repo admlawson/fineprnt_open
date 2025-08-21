@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "ai": "https://esm.sh/ai@3.2.0",
+    "openai": "https://esm.sh/openai@5.3.0"
+  }
+}
