@@ -35,7 +35,7 @@ export default function AuthInviteFlow() {
   const [step, setStep] = useState<'loading' | 'method_selection' | 'password_setup'>('loading');
 
   useEffect(() => {
-    document.title = 'Complete Your Invitation - OmniClause';
+    document.title = 'Complete Your Invitation - omniclause';
     init();
   }, []);
 

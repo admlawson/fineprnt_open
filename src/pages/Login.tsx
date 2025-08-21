@@ -41,7 +41,7 @@ export const Login: React.FC = () => {
         await login(email, password);
         localStorage.setItem('mc:last_oauth', 'password');
         toast({
-          title: "Welcome to OmniClause!",
+          title: "Welcome to omniclause!",
           description: "You've successfully signed in.",
         });
         navigate('/app');

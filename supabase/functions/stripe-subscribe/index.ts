@@ -4,7 +4,7 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
-const SITE_URL = Deno.env.get('SITE_URL') || 'https://OmniClause.com';
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://omniclause.com';
 
 // Defaults, can be overridden via env
 const BASIC_PRICE_ID = Deno.env.get('BASIC_PRICE_ID') || 'price_1RwTA1P6dw9IxGJArtXr6mz4';

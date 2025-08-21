@@ -55,9 +55,9 @@ export default async function handler(req: Request) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'OmniClause Feedback <feedback@OmniClause.com>',
+        from: 'omniclause Feedback <feedback@omniclause.com>',
         to: ['support@symbianlabs.com'],
-        subject: `OmniClause Feedback — ${category}`,
+        subject: `omniclause Feedback — ${category}`,
         text: body
       })
     });

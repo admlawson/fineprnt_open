@@ -48,7 +48,7 @@ export const Landing: React.FC = () => {
 
   // SEO: title, description, canonical, structured data
   React.useEffect(() => {
-    const title = 'OmniClause — Recover Lost Revenue from Complex Medical Contracts';
+    const title = 'omniclause — Recover Lost Revenue from Complex Medical Contracts';
     const description =
       'Chat with payer contracts, medical policies, and reimbursement schedules. Surface missed revenue, risky clauses, and compliance gaps in minutes.';
     document.title = title;
@@ -72,7 +72,7 @@ export const Landing: React.FC = () => {
     const ld = {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
-      name: 'OmniClause',
+      name: 'omniclause',
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web',
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
@@ -118,7 +118,7 @@ export const Landing: React.FC = () => {
       role: '',
       company: '',
       quote:
-        'OmniClause caught a clause that would have cost me thousands. The citations make approvals painless.',
+        'omniclause caught a clause that would have cost me thousands. The citations make approvals painless.',
     },
   ];
 
@@ -130,7 +130,7 @@ export const Landing: React.FC = () => {
         {/* HERO with parallax media */}
         <section
           ref={heroRef}
-          aria-label="Doctor helping a child—OmniClause helps you get clear answers from contracts"
+          aria-label="Doctor helping a child—omniclause helps you get clear answers from contracts"
           className="relative h-[70vh] md:h-[78vh] overflow-hidden"
         >
           <div
@@ -139,7 +139,7 @@ export const Landing: React.FC = () => {
           >
             {/* LCP-critical image */}
             <img
-              src="https://api.omniclause.com/storage/v1/object/public/website/public/OmniClauseHero.png"
+              src="https://api.omniclause.com/storage/v1/object/public/website/public/omniclauseHero.png"
               alt=""
               className="absolute inset-0 h-full w-full object-cover"
               loading="eager"
@@ -155,11 +155,11 @@ export const Landing: React.FC = () => {
               loop
               playsInline
               preload="metadata"
-              poster="https://api.omniclause.com/storage/v1/object/public/website/public/OmniClauseHero.png"
+              poster="https://api.omniclause.com/storage/v1/object/public/website/public/omniclauseHero.png"
               aria-hidden="true"
             >
-              <source src="https://api.omniclause.com/storage/v1/object/public/website/public/images/OmniClauseHero.mp4" type="video/mp4" />
-              <source src="https://api.omniclause.com/storage/v1/object/public/website/public/OmniClauseHero.webm" type="video/webm" />
+              <source src="https://api.omniclause.com/storage/v1/object/public/website/public/images/omniclauseHero.mp4" type="video/mp4" />
+              <source src="https://api.omniclause.com/storage/v1/object/public/website/public/omniclauseHero.webm" type="video/webm" />
               Your browser does not support the video tag.
               </video>
             )}
@@ -275,7 +275,7 @@ export const Landing: React.FC = () => {
               <div className="w-full max-w-[460px] rounded-xl border border-destructive/20 bg-destructive/5 p-6 shadow-soft mx-auto">
                 <div className="flex items-center gap-2 mb-3">
                   <XCircle className="h-5 w-5 text-destructive" aria-hidden="true" />
-                  <h3 className="text-lg font-semibold">Before OmniClause</h3>
+                  <h3 className="text-lg font-semibold">Before omniclause</h3>
                 </div>
                 <ul className="space-y-3 text-sm">
                   <li className="flex gap-2"><XCircle className="mt-0.5 h-4 w-4 text-destructive" aria-hidden="true" /> Hours lost searching clauses</li>
@@ -292,7 +292,7 @@ export const Landing: React.FC = () => {
               <div className="w-full max-w-[460px] rounded-xl border border-primary/20 bg-primary/5 p-6 shadow-soft mx-auto">
                 <div className="flex items-center gap-2 mb-3">
                   <CheckCircle2 className="h-5 w-5 text-primary" aria-hidden="true" />
-                  <h3 className="text-lg font-semibold">After OmniClause</h3>
+                  <h3 className="text-lg font-semibold">After omniclause</h3>
                 </div>
                 <ul className="space-y-3 text-sm">
                   <li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" aria-hidden="true" /> Clear answers in seconds</li>
@@ -317,7 +317,7 @@ export const Landing: React.FC = () => {
         <section id="features" className="py-16 px-4 bg-secondary/30">
           <div className="container mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold">Why Teams Rely on OmniClause</h2>
+              <h2 className="text-3xl font-bold">Why Teams Rely on omniclause</h2>
               <p className="text-muted-foreground mt-2">Outcome‑driven answers that move work forward.</p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -352,7 +352,7 @@ export const Landing: React.FC = () => {
               <Card className="border-0 shadow-soft hover:shadow-medium transition">
                 <CardHeader>
                   <CardTitle>Basic</CardTitle>
-                  <CardDescription>For trying OmniClause on a single contract</CardDescription>
+                  <CardDescription>For trying omniclause on a single contract</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -426,7 +426,7 @@ export const Landing: React.FC = () => {
                 The answer you need, with the citation you can trust
               </p>
               <blockquote className="mt-6 text-sm italic text-muted-foreground/90">
-                “Behind every claim is a patient. Behind every denial is lost care. OmniClause helps your team fight for both.”
+                “Behind every claim is a patient. Behind every denial is lost care. omniclause helps your team fight for both.”
               </blockquote>
               <div className="mt-6 flex gap-3">
                 <Button size="lg" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>View pricing</Button>
@@ -470,7 +470,7 @@ export const Landing: React.FC = () => {
           <div className="container mx-auto max-w-3xl">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold">Frequently asked questions</h2>
-              <p className="text-muted-foreground mt-2">Everything you need to know about OmniClause.</p>
+              <p className="text-muted-foreground mt-2">Everything you need to know about omniclause.</p>
             </div>
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1">
@@ -505,7 +505,7 @@ export const Landing: React.FC = () => {
           <div className="container mx-auto text-center">
             <h2 className="text-3xl font-bold mb-4 text-primary-foreground">Stop guessing. Start recovering what you’ve earned.</h2>
             <p className="text-xl text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-              OmniClause gives you clarity, confidence, and control — in minutes.
+              omniclause gives you clarity, confidence, and control — in minutes.
             </p>
             <Button size="lg" variant="secondary" onClick={() => navigate('/login')}>
               Start Here today

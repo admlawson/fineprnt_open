@@ -285,7 +285,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
             <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
               <span className="text-sm font-bold text-primary-foreground">MC</span>
             </div>
-            <span className="font-semibold text-sidebar-foreground">OmniClause</span>
+            <span className="font-semibold text-sidebar-foreground">omniclause</span>
           </div>
         )}
         <Button

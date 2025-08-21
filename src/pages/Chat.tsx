@@ -766,7 +766,7 @@ export const Chat: React.FC = () => {
                 
                 {/* Two-lane approach explanation */}
                 <div className="max-w-2xl mx-auto mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h3 className="text-sm font-semibold text-blue-800 mb-2">🤖 How OmniClause Works</h3>
+                  <h3 className="text-sm font-semibold text-blue-800 mb-2">🤖 How omniclause Works</h3>
                   <div className="text-xs text-blue-700 space-y-2">
                     <div className="flex items-start space-x-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>

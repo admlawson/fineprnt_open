@@ -502,7 +502,7 @@ const expandQuery = (q: string, contractType: string, debug: boolean = false): s
 
 // --- Enhanced system prompts based on contract type ---
 const getSystemPrompt = (contractType: string, filename: string): string => {
-  const basePrompt = `You are OmniClause — a precise, trustworthy contract companion for "${filename}" (${contractType}). Your task is to analyze the provided context and answer the user's question by strictly adhering to the following two-lane format and rules.
+  const basePrompt = `You are omniclause — a precise, trustworthy contract companion for "${filename}" (${contractType}). Your task is to analyze the provided context and answer the user's question by strictly adhering to the following two-lane format and rules.
 
 ### Core Behavior
 - **Two-lane answers**: Your response MUST be divided into two distinct lanes:

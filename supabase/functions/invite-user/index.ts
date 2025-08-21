@@ -175,19 +175,19 @@ serve(async (req) => {
 
       // Send custom Azure AD invitation email via Resend
       const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
-      const siteUrl = Deno.env.get('SITE_URL') || 'https://www.OmniClause.com';
+      const siteUrl = Deno.env.get('SITE_URL') || 'https://www.omniclause.com';
       const inviteLink = `${siteUrl}/auth/complete-invite?token=${customInvite.token}&type=azure_ad`;
 
       try {
         const emailResponse = await resend.emails.send({
-          from: 'OmniClause <noreply@OmniClause.com>',
+          from: 'omniclause <noreply@omniclause.com>',
           to: [email],
-          subject: `You're invited to join ${org.name} on OmniClause`,
+          subject: `You're invited to join ${org.name} on omniclause`,
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
               <h1 style="color: #333; font-size: 24px; margin-bottom: 20px;">You're invited to join ${org.name}</h1>
               <p style="color: #666; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
-                You've been invited to join <strong>${org.name}</strong> on OmniClause. 
+                You've been invited to join <strong>${org.name}</strong> on omniclause. 
                 Since your organization uses Microsoft Azure AD, please use the button below to sign in with your Microsoft account.
               </p>
               <div style="text-align: center; margin: 30px 0;">
@@ -245,7 +245,7 @@ serve(async (req) => {
         role: role,
         invited_by: user.id
       },
-      redirectTo: `${Deno.env.get('SITE_URL') || 'https://www.OmniClause.com'}/auth/complete-invite`
+      redirectTo: `${Deno.env.get('SITE_URL') || 'https://www.omniclause.com'}/auth/complete-invite`
     });
 
     if (inviteResult.error) {

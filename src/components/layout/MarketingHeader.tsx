@@ -40,7 +40,7 @@ const MarketingHeader: React.FC = () => {
           <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
             <span className="text-sm font-bold text-primary-foreground">MC</span>
           </div>
-          <span className="text-xl font-bold">OmniClause</span>
+          <span className="text-xl font-bold">omniclause</span>
           <Badge variant="secondary" className="ml-2">Healthcare</Badge>
         </Link>
         <div className="hidden md:flex items-center gap-6 text-sm">

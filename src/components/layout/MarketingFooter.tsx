@@ -11,14 +11,14 @@ const MarketingFooter: React.FC = () => {
             <div className="w-6 h-6 bg-gradient-primary rounded flex items-center justify-center">
               <span className="text-xs font-bold text-primary-foreground">MC</span>
             </div>
-            <span className="font-semibold">OmniClause</span>
+            <span className="font-semibold">omniclause</span>
           </div>
           <nav className="flex justify-center gap-6 text-sm text-muted-foreground">
             <Link className="hover:text-foreground" to="/termsofservice" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Terms of Service</Link>
             <Link className="hover:text-foreground" to="/privacypolicy" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Privacy Policy</Link>
-            <a className="hover:text-foreground" href="mailto:support@OmniClause.com">Support</a>
+            <a className="hover:text-foreground" href="mailto:support@omniclause.com">Support</a>
           </nav>
-          <div className="text-sm text-muted-foreground text-center md:text-right">© {year} OmniClause. All rights reserved.</div>
+          <div className="text-sm text-muted-foreground text-center md:text-right">© {year} omniclause. All rights reserved.</div>
         </div>
       </div>
     </footer>

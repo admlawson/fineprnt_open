@@ -1,4 +1,4 @@
-## OmniClause B2C Refactor — Execution Plan (Blank Supabase)
+## omniclause B2C Refactor — Execution Plan (Blank Supabase)
 
 ### Phase 1 — Init (DB + RLS + RPCs)
 

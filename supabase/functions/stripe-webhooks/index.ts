@@ -13,8 +13,8 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET') || '';
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY') || '';
 // Defaults populated from Stripe MCP discovery (non-secret)
-const BASIC_PRICE_ID = Deno.env.get('BASIC_PRICE_ID') || 'price_1RwTA1P6dw9IxGJArtXr6mz4';
-const PRO_PRICE_ID = Deno.env.get('PRO_PRICE_ID') || 'price_1RwTAlP6dw9IxGJADFkzcbOB';
+const BASIC_PRICE_ID = Deno.env.get('BASIC_PRICE_ID') || 'price_1RybToP6dw9IxGJAKZILFex3';
+const PRO_PRICE_ID = Deno.env.get('PRO_PRICE_ID') || 'price_1RybUxP6dw9IxGJAPrkGr2XH';
 // Product IDs are intentionally unused now; plan detection is price-ID only
 
 function resolvePlanKeyFromStripe(input: { price: any }): 'basic' | 'pro' {
