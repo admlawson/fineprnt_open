@@ -12,10 +12,19 @@ export const baseCorsHeaders = {
 };
 
 export function buildCorsHeaders(origin?: string) {
-  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  // If origin is provided and is in allowed list, use it
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    return {
+      ...baseCorsHeaders,
+      'Access-Control-Allow-Origin': origin,
+    } as Record<string, string>;
+  }
+  
+  // For production, default to the main domain
+  const defaultOrigin = 'https://www.omniclause.com';
   return {
     ...baseCorsHeaders,
-    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Origin': defaultOrigin,
   } as Record<string, string>;
 }
 
