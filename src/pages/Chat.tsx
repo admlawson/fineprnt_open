@@ -765,23 +765,39 @@ export const Chat: React.FC = () => {
                 </p>
                 
                 {/* Two-lane approach explanation */}
-                <div className="max-w-2xl mx-auto mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h3 className="text-sm font-semibold text-blue-800 mb-2">🤖 How omniclause Works</h3>
-                  <div className="text-xs text-blue-700 space-y-2">
-                    <div className="flex items-start space-x-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                      <span><strong>Document Facts:</strong> Grounded information directly from your contract with citations</span>
+                <Card className="max-w-2xl mx-auto mb-6">
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-lg">🤖</span>
+                      </div>
+                      <h3 className="text-sm font-semibold">How omniclause Works</h3>
                     </div>
-                    <div className="flex items-start space-x-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                      <span><strong>General Guidance:</strong> Helpful context and best practices (not specific to your contract)</span>
+                    <div className="space-y-3 text-sm text-muted-foreground">
+                      <div className="flex items-start space-x-3">
+                        <div className="w-3 h-3 bg-green-500 rounded-full mt-1 flex-shrink-0"></div>
+                        <div>
+                          <span className="font-medium text-foreground">Document Facts:</span>
+                          <span className="ml-1">Grounded information directly from your contract with citations</span>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-3">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>
+                        <div>
+                          <span className="font-medium text-foreground">General Guidance:</span>
+                          <span className="ml-1">Helpful context and best practices (not specific to your contract)</span>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-3">
+                        <div className="w-3 h-3 bg-amber-500 rounded-full mt-1 flex-shrink-0"></div>
+                        <div>
+                          <span className="font-medium text-foreground">Missing Info:</span>
+                          <span className="ml-1">What we couldn't find in your document</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-start space-x-2">
-                      <div className="w-2 h-2 bg-amber-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                      <span><strong>Missing Info:</strong> What we couldn't find in your document</span>
-                    </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
