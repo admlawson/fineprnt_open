@@ -55,9 +55,9 @@ export default async function handler(req: Request) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'omniclause Support <support@omniclause.com>',
+        from: 'fineprnt Support <support@fineprnt.com>',
         to: ['support@symbianlabs.com'],
-        subject: `omniclause Support — ${category}`,
+        subject: `fineprnt Support — ${category}`,
         text: body
       })
     });

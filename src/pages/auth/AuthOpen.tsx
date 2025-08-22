@@ -12,7 +12,7 @@ export default function AuthOpen() {
     console.log('AuthOpen: Processing target URL:', target);
     
     // Validate the URL to ensure it's a legitimate Supabase auth URL
-    const ok = target.startsWith('https://api.omniclause.com/auth/v1/verify');
+    const ok = target.startsWith('https://api.fineprnt.com/auth/v1/verify');
     
     if (ok) {
       // Check if this is a password recovery flow

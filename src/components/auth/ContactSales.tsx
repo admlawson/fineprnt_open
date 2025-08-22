@@ -17,7 +17,7 @@ export function ContactSales() {
     e.preventDefault();
     // Open email client with pre-filled information
     const subject = `Enterprise Upgrade Request - ${user?.organizationName}`;
-    const body = `Hi omniclause Sales Team,
+    const body = `Hi fineprnt Sales Team,
 
 I would like to upgrade ${user?.organizationName} to Enterprise access.
 
@@ -30,7 +30,7 @@ Please contact me to discuss pricing and next steps.
 
 Thank you!`;
 
-    window.open(`mailto:sales@omniclause.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+    window.open(`mailto:sales@fineprnt.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
     setSubmitted(true);
   };
 
@@ -70,7 +70,7 @@ Thank you!`;
           </div>
           <CardTitle className="text-2xl">Upgrade to Enterprise</CardTitle>
           <CardDescription className="text-lg">
-            Unlock the full power of omniclause for {user?.organizationName}
+            Unlock the full power of fineprnt for {user?.organizationName}
           </CardDescription>
           
           {subscription_status === 'trial' && days_remaining !== null && (
@@ -153,13 +153,13 @@ Thank you!`;
               <Button 
                 variant="outline" 
                 className="h-auto p-4 space-y-2"
-                onClick={() => window.open('https://calendly.com/omniclause/enterprise-demo', '_blank')}
+                onClick={() => window.open('https://calendly.com/fineprnt/enterprise-demo', '_blank')}
               >
                 <div className="flex items-center space-x-2">
                   <Phone className="h-5 w-5" />
                   <span className="font-semibold">Schedule Demo</span>
                 </div>
-                <div className="text-xs opacity-90">See omniclause in action</div>
+                <div className="text-xs opacity-90">See fineprnt in action</div>
               </Button>
             </div>
           </div>

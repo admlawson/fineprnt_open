@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
@@ -49,6 +50,7 @@ interface Document {
 
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
   const { user, session } = useAuth();
+  const { resolvedTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
@@ -281,11 +283,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         {!collapsed && (
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <span className="text-sm font-bold text-primary-foreground">MC</span>
-            </div>
-            <span className="font-semibold text-sidebar-foreground">omniclause</span>
+          <div className="flex items-center justify-center">
+            <img
+              src={resolvedTheme === 'dark' 
+                ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt%20logo%20dark.png"
+                : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt%20logo%20light.png"
+              }
+              alt="Fineprnt"
+              className="h-10 w-auto"
+              loading="eager"
+              decoding="async"
+            />
           </div>
         )}
         <Button

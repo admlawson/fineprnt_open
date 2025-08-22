@@ -771,7 +771,7 @@ export const Chat: React.FC = () => {
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                         <span className="text-lg">🤖</span>
                       </div>
-                      <h3 className="text-sm font-semibold">How omniclause Works</h3>
+                      <h3 className="text-sm font-semibold">How fineprnt Works</h3>
                     </div>
                     <div className="space-y-3 text-sm text-muted-foreground">
                       <div className="flex items-start space-x-3">

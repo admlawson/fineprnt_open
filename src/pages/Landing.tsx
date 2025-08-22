@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTheme } from '@/contexts/ThemeContext';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +16,6 @@ import {
   Search,
   CheckCircle2,
   XCircle,
-  Sparkles,
   Lock,
   LineChart,
 } from 'lucide-react';
@@ -25,6 +25,7 @@ import MarketingFooter from '@/components/layout/MarketingFooter';
 
 export const Landing: React.FC = () => {
   const navigate = useNavigate();
+  const { resolvedTheme } = useTheme();
 
   // Parallax offset (respects prefers-reduced-motion)
   const [offsetY, setOffsetY] = React.useState(0);
@@ -48,9 +49,9 @@ export const Landing: React.FC = () => {
 
   // SEO: title, description, canonical, structured data
   React.useEffect(() => {
-    const title = 'omniclause — Recover Lost Revenue from Complex Medical Contracts';
+    const title = 'Fineprnt — Chat with Any Contract in Plain English';
     const description =
-      'Chat with payer contracts, medical policies, and reimbursement schedules. Surface missed revenue, risky clauses, and compliance gaps in minutes.';
+      'Any Contract. Any Question, Clarity in Seconds. Dont get caught in the fine print. Upload any contract and ask any question in plain English. We handle the rest.';
     document.title = title;
 
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
@@ -72,7 +73,7 @@ export const Landing: React.FC = () => {
     const ld = {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
-      name: 'omniclause',
+      name: 'fineprnt',
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web',
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
@@ -100,9 +101,9 @@ export const Landing: React.FC = () => {
   }, [location.hash]);
 
   const features = [
-    { icon: Zap, title: 'Minutes to clarity', description: 'Upload, ask, and get plain‑English answers fast.' },
+    { icon: Zap, title: 'Calrity in Seconds', description: 'Upload, ask, and get plain‑English answers with citations fast.' },
     { icon: Search, title: 'Proof you can act on', description: 'Every response cites the exact clause and page.' },
-    { icon: MessageSquare, title: 'No legal training required', description: 'Anyone on your team can resolve fine print confidently.' },
+    { icon: MessageSquare, title: 'No legal training required', description: 'Anyone can resolve fine print confidently.' },
   ];
 
   const testimonials = [
@@ -118,7 +119,7 @@ export const Landing: React.FC = () => {
       role: '',
       company: '',
       quote:
-        'omniclause caught a clause that would have cost me thousands. The citations make approvals painless.',
+        'fineprnt caught a clause that would have cost me thousands. The citations make approvals painless.',
     },
   ];
 
@@ -130,85 +131,123 @@ export const Landing: React.FC = () => {
         {/* HERO with parallax media */}
         <section
           ref={heroRef}
-          aria-label="Doctor helping a child—omniclause helps you get clear answers from contracts"
-          className="relative h-[70vh] md:h-[78vh] overflow-hidden"
+          aria-label="Doctor helping a child—fineprnt helps you get clear answers from contracts"
+          className="relative h-[80vh] sm:h-[75vh] md:h-[78vh] overflow-hidden pt-20 sm:pt-24 md:pt-16"
         >
           <div
             className="pointer-events-none absolute inset-0 z-0"
             style={{ transform: reduceMotion ? undefined : `translateY(${offsetY * 0.15}px)` }}
           >
-            {/* LCP-critical image */}
+            {/* LCP-critical image - theme aware */}
             <img
-              src="https://api.omniclause.com/storage/v1/object/public/website/public/omniclauseHero.png"
+              key={`hero-image-${resolvedTheme}`}
+              src={resolvedTheme === 'dark' 
+                ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark.png"
+                : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light.png"
+              }
               alt=""
               className="absolute inset-0 h-full w-full object-cover"
               loading="eager"
               decoding="async"
               fetchPriority="high"
             />
-            {/* Lightweight video only when motion is allowed */}
+            {/* Lightweight video only when motion is allowed - theme aware */}
             {!reduceMotion && (
               <video
+              key={`hero-video-${resolvedTheme}`}
               className="absolute inset-0 h-full w-full object-cover"
               autoPlay
               muted
               loop
               playsInline
               preload="metadata"
-              poster="https://api.omniclause.com/storage/v1/object/public/website/public/omniclauseHero.png"
+              poster={resolvedTheme === 'dark' 
+                ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark.png"
+                : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light.png"
+              }
               aria-hidden="true"
             >
-              <source src="https://api.omniclause.com/storage/v1/object/public/website/public/images/omniclauseHero.mp4" type="video/mp4" />
-              <source src="https://api.omniclause.com/storage/v1/object/public/website/public/omniclauseHero.webm" type="video/webm" />
+              <source 
+                src={resolvedTheme === 'dark' 
+                  ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark-animated.mp4"
+                  : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light-animated.mp4"
+                } 
+                type="video/mp4" 
+              />
+              <source 
+                src={resolvedTheme === 'dark' 
+                  ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark-animated.webm"
+                  : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light-animated.webm"
+                } 
+                type="video/webm" 
+              />
               Your browser does not support the video tag.
               </video>
             )}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
+
           </div>
 
           <div className="relative h-full flex items-center justify-center">
             <div
-              className="mx-auto max-w-3xl text-center px-4 hero-overlay"
+              className="mx-auto max-w-3xl text-center px-6 sm:px-8 md:px-12 hero-overlay"
               style={{ transform: reduceMotion ? undefined : `translateY(${offsetY * -0.05}px)` }}
             >
-              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 text-emerald-200 px-3 py-1 text-xs md:text-sm backdrop-blur">
-                <Sparkles className="h-4 w-4" aria-hidden="true" />
-                Built for your real-world questions
+              {/* Fineprnt Logo */}
+              <div className="mb-4 sm:mb-6">
+                <div className={`font-courier text-xl sm:text-2xl md:text-3xl font-bold ${
+                  resolvedTheme === 'dark' ? 'text-white' : 'text-black'
+                }`}>
+                  Fineprnt
+                </div>
+                <div className={`w-16 sm:w-20 h-0.5 mx-auto mt-1 ${
+                  resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'
+                }`}></div>
               </div>
 
-              <h1 className="mt-4 text-4xl md:text-6xl font-bold tracking-tight text-white">
-                Stop losing time and money. Chat with your Medical Contracts.
+              <h1 className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight leading-tight ${
+                resolvedTheme === 'dark' ? 'text-white' : 'text-black'
+              }`}>
+                Any Document. Any Question. Clarity in Seconds.
               </h1>
 
-              <p className="mt-4 text-base md:text-xl text-white/90">
-                Upload your contracts and policies. Ask questions in plain English. Get instant answers — with citations you can trust.
+              <p className={`mt-3 sm:mt-4 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed ${
+                resolvedTheme === 'dark' ? 'text-white/90' : 'text-black/80'
+              }`}>
+                Dont get caught in the fine print. Upload any contract and ask questions in plain English.
               </p>
 
-              <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Button size="lg" onClick={() => navigate('/login')}>
+              <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+                <Button size="lg" className="w-full sm:w-auto" onClick={() => navigate('/login')}>
                   Start here
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
+                  className="w-full sm:w-auto"
                   onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   How it works
                 </Button>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-white/90">
-                <div className="flex items-center justify-center gap-2">
-                  <LineChart className="h-4 w-4" aria-hidden="true" /> Clarity in minutes
+              <div className={`mt-6 sm:mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-xs sm:text-sm ${
+                resolvedTheme === 'dark' ? 'text-white/90' : 'text-black/70'
+              }`}>
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                  <LineChart className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" /> 
+                  <span className="text-center">Clarity in seconds</span>
                 </div>
-                <div className="flex items-center justify-center gap-2">
-                  <Search className="h-4 w-4" aria-hidden="true" /> Proof you can trust
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                  <Search className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" /> 
+                  <span className="text-center">Citations you can trust</span>
                 </div>
-                <div className="flex items-center justify-center gap-2">
-                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> Fewer denials
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                  <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" /> 
+                  <span className="text-center">Guidance when needed</span>
                 </div>
-                <div className="flex items-center justify-center gap-2">
-                  <Lock className="h-4 w-4" aria-hidden="true" /> Peace of mind
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                  <Lock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" /> 
+                  <span className="text-center">Peace of mind</span>
                 </div>
               </div>
             </div>
@@ -275,7 +314,7 @@ export const Landing: React.FC = () => {
               <div className="w-full max-w-[460px] rounded-xl border border-destructive/20 bg-destructive/5 p-6 shadow-soft mx-auto">
                 <div className="flex items-center gap-2 mb-3">
                   <XCircle className="h-5 w-5 text-destructive" aria-hidden="true" />
-                  <h3 className="text-lg font-semibold">Before omniclause</h3>
+                  <h3 className="text-lg font-semibold">Before fineprnt</h3>
                 </div>
                 <ul className="space-y-3 text-sm">
                   <li className="flex gap-2"><XCircle className="mt-0.5 h-4 w-4 text-destructive" aria-hidden="true" /> Hours lost searching clauses</li>
@@ -292,7 +331,7 @@ export const Landing: React.FC = () => {
               <div className="w-full max-w-[460px] rounded-xl border border-primary/20 bg-primary/5 p-6 shadow-soft mx-auto">
                 <div className="flex items-center gap-2 mb-3">
                   <CheckCircle2 className="h-5 w-5 text-primary" aria-hidden="true" />
-                  <h3 className="text-lg font-semibold">After omniclause</h3>
+                  <h3 className="text-lg font-semibold">After fineprnt</h3>
                 </div>
                 <ul className="space-y-3 text-sm">
                   <li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" aria-hidden="true" /> Clear answers in seconds</li>
@@ -317,7 +356,7 @@ export const Landing: React.FC = () => {
         <section id="features" className="py-16 px-4 bg-secondary/30">
           <div className="container mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold">Why Teams Rely on omniclause</h2>
+              <h2 className="text-3xl font-bold">Why Teams Rely on fineprnt</h2>
               <p className="text-muted-foreground mt-2">Outcome‑driven answers that move work forward.</p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -352,11 +391,11 @@ export const Landing: React.FC = () => {
               <Card className="border-0 shadow-soft hover:shadow-medium transition">
                 <CardHeader>
                   <CardTitle>Basic</CardTitle>
-                  <CardDescription>For trying omniclause on a single contract</CardDescription>
+                  <CardDescription>For trying fineprnt on a single contract</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <div className="text-3xl font-bold">$40<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
+                    <div className="text-3xl font-bold">$20<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> 1 document / month</li>
@@ -376,7 +415,7 @@ export const Landing: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <div className="text-3xl font-bold">$60<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
+                    <div className="text-3xl font-bold">$40<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> 5 documents / month</li>
@@ -426,7 +465,7 @@ export const Landing: React.FC = () => {
                 The answer you need, with the citation you can trust
               </p>
               <blockquote className="mt-6 text-sm italic text-muted-foreground/90">
-                “Behind every claim is a patient. Behind every denial is lost care. omniclause helps your team fight for both.”
+                “Behind every claim is a patient. Behind every denial is lost care. fineprnt helps your team fight for both.”
               </blockquote>
               <div className="mt-6 flex gap-3">
                 <Button size="lg" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>View pricing</Button>
@@ -436,7 +475,7 @@ export const Landing: React.FC = () => {
             {/* Image */}
             <div className="relative">
               <img
-                src="https://api.omniclause.com/storage/v1/object/public/website/public/EmotionalCTA.png"
+                src="https://api.fineprnt.com/storage/v1/object/public/website/public/EmotionalCTA.png"
                 alt="Clinician reassuring a patient — focus on care, not paperwork"
                 className="w-full h-auto rounded-xl shadow-medium object-cover"
                 loading="lazy"
@@ -470,7 +509,7 @@ export const Landing: React.FC = () => {
           <div className="container mx-auto max-w-3xl">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold">Frequently asked questions</h2>
-              <p className="text-muted-foreground mt-2">Everything you need to know about omniclause.</p>
+              <p className="text-muted-foreground mt-2">Everything you need to know about fineprnt.</p>
             </div>
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1">
@@ -505,7 +544,7 @@ export const Landing: React.FC = () => {
           <div className="container mx-auto text-center">
             <h2 className="text-3xl font-bold mb-4 text-primary-foreground">Stop guessing. Start recovering what you’ve earned.</h2>
             <p className="text-xl text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-              omniclause gives you clarity, confidence, and control — in minutes.
+              fineprnt gives you clarity, confidence, and control — in minutes.
             </p>
             <Button size="lg" variant="secondary" onClick={() => navigate('/login')}>
               Start Here today
