@@ -289,6 +289,19 @@
 /* Make hero text readable over media */
 /* Removed text shadows for clean text appearance */
 
+/* Responsive media fit for hero image/video */
+/* Default to cover to avoid side gaps; fall back to contain on very tall/narrow screens */
+.hero-media {
+  object-fit: cover;
+}
+
+@media (max-aspect-ratio: 4/5) {
+  /* On very tall/narrow screens, contain so important edges remain visible */
+  .hero-media {
+    object-fit: contain;
+  }
+}
+
 /* Fade the bottom of the hero into the next section - very subtle */
 .hero-fade {
   position: absolute;
