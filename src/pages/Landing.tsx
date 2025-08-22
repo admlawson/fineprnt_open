@@ -132,7 +132,7 @@ export const Landing: React.FC = () => {
         <section
           ref={heroRef}
           aria-label="Doctor helping a child—fineprnt helps you get clear answers from contracts"
-          className="relative h-[80vh] sm:h-[75vh] md:h-[78vh] overflow-hidden pt-20 sm:pt-24 md:pt-16"
+          className="relative h-[100vh] sm:h-[90vh] md:h-[85vh] overflow-hidden pt-16 sm:pt-20 md:pt-16"
         >
           <div
             className="pointer-events-none absolute inset-0 z-0"
@@ -146,7 +146,7 @@ export const Landing: React.FC = () => {
                 : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light.png"
               }
               alt=""
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full hero-media"
               loading="eager"
               decoding="async"
               fetchPriority="high"
@@ -155,7 +155,7 @@ export const Landing: React.FC = () => {
             {!reduceMotion && (
               <video
               key={`hero-video-${resolvedTheme}`}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full hero-media"
               autoPlay
               muted
               loop
@@ -193,37 +193,37 @@ export const Landing: React.FC = () => {
               style={{ transform: reduceMotion ? undefined : `translateY(${offsetY * -0.05}px)` }}
             >
               {/* Fineprnt Logo */}
-              <div className="mb-4 sm:mb-6">
-                <div className={`font-courier text-xl sm:text-2xl md:text-3xl font-bold ${
+              <div className="mb-3 sm:mb-4 md:mb-6">
+                <div className={`font-courier text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold ${
                   resolvedTheme === 'dark' ? 'text-white' : 'text-black'
                 }`}>
                   Fineprnt
                 </div>
-                <div className={`w-16 sm:w-20 h-0.5 mx-auto mt-1 ${
+                <div className={`w-14 sm:w-16 md:w-20 h-0.5 mx-auto mt-1 ${
                   resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'
                 }`}></div>
               </div>
 
-              <h1 className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight leading-tight ${
+              <h1 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold tracking-tight leading-tight ${
                 resolvedTheme === 'dark' ? 'text-white' : 'text-black'
               }`}>
                 Any Document. Any Question. Clarity in Seconds.
               </h1>
 
-              <p className={`mt-3 sm:mt-4 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed ${
+              <p className={`mt-2 sm:mt-3 md:mt-4 text-xs sm:text-sm md:text-base max-w-xl sm:max-w-2xl mx-auto leading-relaxed ${
                 resolvedTheme === 'dark' ? 'text-white/90' : 'text-black/80'
               }`}>
                 Dont get caught in the fine print. Upload any contract and ask questions in plain English.
               </p>
 
-              <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-                <Button size="lg" className="w-full sm:w-auto" onClick={() => navigate('/login')}>
+              <div className="mt-3 sm:mt-4 md:mt-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+                <Button size="default" className="w-full sm:w-auto text-sm sm:text-base" onClick={() => navigate('/login')}>
                   Start here
                 </Button>
                 <Button
-                  size="lg"
+                  size="default"
                   variant="outline"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto text-sm sm:text-base"
                   onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   How it works
