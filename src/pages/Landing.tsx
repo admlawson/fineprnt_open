@@ -31,6 +31,8 @@ export const Landing: React.FC = () => {
   const [offsetY, setOffsetY] = React.useState(0);
   const [reduceMotion, setReduceMotion] = React.useState(false);
   const heroRef = React.useRef<HTMLDivElement | null>(null);
+  // Decide when to use mobile-optimized hero media
+  const [useMobileHero, setUseMobileHero] = React.useState(false);
 
   React.useEffect(() => {
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -38,6 +40,22 @@ export const Landing: React.FC = () => {
     set();
     mql.addEventListener?.('change', set);
     return () => mql.removeEventListener?.('change', set);
+  }, []);
+
+  // Update hero asset choice based on aspect ratio / width
+  React.useEffect(() => {
+    const update = () => {
+      const narrowAspect = window.matchMedia('(max-aspect-ratio: 4/5)').matches;
+      const smallWidth = window.matchMedia('(max-width: 640px)').matches;
+      setUseMobileHero(narrowAspect || smallWidth);
+    };
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('orientationchange', update as any);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('orientationchange', update as any);
+    };
   }, []);
 
   React.useEffect(() => {
@@ -140,10 +158,14 @@ export const Landing: React.FC = () => {
           >
             {/* LCP-critical image - theme aware */}
             <img
-              key={`hero-image-${resolvedTheme}`}
-              src={resolvedTheme === 'dark' 
-                ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark.png"
-                : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light.png"
+              key={`hero-image-${resolvedTheme}-${useMobileHero ? 'm' : 'd'}`}
+              src={resolvedTheme === 'dark'
+                ? (useMobileHero
+                    ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-dark-mobile.png'
+                    : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark.png')
+                : (useMobileHero
+                    ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-light-mobile.png'
+                    : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light.png')
               }
               alt=""
               className="absolute inset-0 h-full w-full hero-media"
@@ -154,32 +176,44 @@ export const Landing: React.FC = () => {
             {/* Lightweight video only when motion is allowed - theme aware */}
             {!reduceMotion && (
               <video
-              key={`hero-video-${resolvedTheme}`}
+              key={`hero-video-${resolvedTheme}-${useMobileHero ? 'm' : 'd'}`}
               className="absolute inset-0 h-full w-full hero-media"
               autoPlay
               muted
               loop
               playsInline
               preload="metadata"
-              poster={resolvedTheme === 'dark' 
-                ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark.png"
-                : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light.png"
+              poster={resolvedTheme === 'dark'
+                ? (useMobileHero
+                    ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-dark-mobile.png'
+                    : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark.png')
+                : (useMobileHero
+                    ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-light-mobile.png'
+                    : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light.png')
               }
               aria-hidden="true"
             >
-              <source 
-                src={resolvedTheme === 'dark' 
-                  ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark-animated.mp4"
-                  : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light-animated.mp4"
-                } 
-                type="video/mp4" 
+              <source
+                src={resolvedTheme === 'dark'
+                  ? (useMobileHero
+                      ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-dark-mobile.mp4'
+                      : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark-animated.mp4')
+                  : (useMobileHero
+                      ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-light-mobile.mp4'
+                      : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light-animated.mp4')
+                }
+                type="video/mp4"
               />
-              <source 
-                src={resolvedTheme === 'dark' 
-                  ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark-animated.webm"
-                  : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light-animated.webm"
-                } 
-                type="video/webm" 
+              <source
+                src={resolvedTheme === 'dark'
+                  ? (useMobileHero
+                      ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-dark-mobile.webm'
+                      : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark-animated.webm')
+                  : (useMobileHero
+                      ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-light-mobile.webm'
+                      : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light-animated.webm')
+                }
+                type="video/webm"
               />
               Your browser does not support the video tag.
               </video>
