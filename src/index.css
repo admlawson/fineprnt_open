@@ -2,61 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-/* omniclause Design System - Enhanced UI with Glassmorphism */
+/* fineprnt Design System - Enhanced UI with Glassmorphism */
 
 /* Font loaded via index.html */
 
 @layer base {
   :root {
-    /* Core neutrals with enhanced contrast */
+    /* Core neutrals - clean paper aesthetic */
     --background: 0 0% 100%;
-    --foreground: 215 28% 17%;
+    --foreground: 0 0% 9%;
 
-    /* Glass surfaces with backdrop blur */
-    --glass: 0 0% 100% / 0.8;
-    --glass-border: 0 0% 100% / 0.2;
-    --glass-hover: 0 0% 100% / 0.9;
+    /* Glass surfaces with subtle paper texture */
+    --glass: 0 0% 100% / 0.85;
+    --glass-border: 0 0% 90% / 0.3;
+    --glass-hover: 0 0% 100% / 0.95;
 
-    /* Cards and surfaces with depth */
-    --card: 0 0% 100% / 0.95;
-    --card-foreground: 215 28% 17%;
-    --card-border: 220 13% 91% / 0.5;
+    /* Cards and surfaces - paper-like */
+    --card: 0 0% 99%;
+    --card-foreground: 0 0% 9%;
+    --card-border: 0 0% 88% / 0.6;
 
-    /* Elevated surfaces */
-    --surface: 0 0% 99%;
+    /* Elevated surfaces - subtle paper layers */
+    --surface: 0 0% 98%;
     --surface-elevated: 0 0% 100%;
-    --surface-glass: 0 0% 100% / 0.85;
+    --surface-glass: 0 0% 99% / 0.9;
 
-    /* Popover and overlay with glass effect */
-    --popover: 0 0% 100% / 0.95;
-    --popover-foreground: 215 28% 17%;
-    --popover-border: 220 13% 91% / 0.3;
+    /* Popover and overlay - clean paper */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+    --popover-border: 0 0% 88% / 0.4;
 
-    /* Primary brand — medical blue */
-    --primary: 210 90% 50%;
+    /* Primary brand — clean black */
+    --primary: 0 0% 9%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 210 90% 45%;
-    --primary-active: 210 90% 40%;
-    --primary-glass: 210 90% 50% / 0.1;
-    --primary-soft: 210 90% 97%;
+    --primary-hover: 0 0% 15%;
+    --primary-active: 0 0% 20%;
+    --primary-glass: 0 0% 9% / 0.1;
+    --primary-soft: 0 0% 96%;
 
-    /* Secondary - Refined neutrals */
-    --secondary: 220 16% 96%;
-    --secondary-foreground: 215 28% 17%;
-    --secondary-hover: 220 16% 92%;
-    --secondary-glass: 220 16% 96% / 0.8;
+    /* Secondary - soft paper grays */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+    --secondary-hover: 0 0% 92%;
+    --secondary-glass: 0 0% 96% / 0.9;
 
-    /* Muted content with better hierarchy */
-    --muted: 220 16% 95%;
-    --muted-foreground: 215 20% 50%;
-    --muted-glass: 220 16% 95% / 0.6;
+    /* Muted content - readable gray hierarchy */
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 45%;
+    --muted-glass: 0 0% 95% / 0.7;
 
-    /* Accent — calm cyan (used sparingly) */
-    --accent: 200 95% 45%;
+    /* Accent — subtle gray (used sparingly) */
+    --accent: 0 0% 20%;
     --accent-foreground: 0 0% 100%;
-    --accent-hover: 200 95% 40%;
-    --accent-glass: 200 95% 45% / 0.1;
-    --accent-soft: 200 95% 97%;
+    --accent-hover: 0 0% 25%;
+    --accent-glass: 0 0% 20% / 0.1;
+    --accent-soft: 0 0% 97%;
 
     /* Destructive - Refined error red */
     --destructive: 0 84% 60%;
@@ -65,42 +65,42 @@
     --destructive-glass: 0 84% 60% / 0.1;
     --destructive-soft: 0 84% 97%;
 
-    /* Borders and inputs with glass treatment */
-    --border: 220 13% 91% / 0.6;
-    --border-strong: 220 13% 85%;
-    --input: 0 0% 100% / 0.9;
-    --input-border: 220 13% 91% / 0.4;
-    --ring: 214 89% 52% / 0.3;
+    /* Borders and inputs - clean paper lines */
+    --border: 0 0% 88% / 0.8;
+    --border-strong: 0 0% 80%;
+    --input: 0 0% 100%;
+    --input-border: 0 0% 88% / 0.6;
+    --ring: 0 0% 9% / 0.3;
 
-    /* Sidebar with enhanced glass effect */
-    --sidebar-background: 0 0% 100% / 0.9;
-    --sidebar-foreground: 215 28% 17%;
-    --sidebar-primary: 214 89% 52%;
+    /* Sidebar - clean paper aesthetic */
+    --sidebar-background: 0 0% 100% / 0.95;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-primary: 0 0% 9%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 16% 96% / 0.8;
-    --sidebar-accent-foreground: 215 28% 17%;
-    --sidebar-border: 220 13% 91% / 0.3;
-    --sidebar-ring: 214 89% 52% / 0.3;
-    --sidebar-glass: 0 0% 100% / 0.95;
+    --sidebar-accent: 0 0% 96% / 0.9;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 88% / 0.4;
+    --sidebar-ring: 0 0% 9% / 0.3;
+    --sidebar-glass: 0 0% 100% / 0.98;
 
-    /* Chat interface with refined glass */
-    --chat-message-user: 214 89% 52%;
-    --chat-message-assistant: 220 16% 96% / 0.9;
-    --chat-input: 0 0% 100% / 0.95;
-    --chat-bubble-glass: 0 0% 100% / 0.85;
+    /* Chat interface - paper-like bubbles */
+    --chat-message-user: 0 0% 9%;
+    --chat-message-assistant: 0 0% 96%;
+    --chat-input: 0 0% 100%;
+    --chat-bubble-glass: 0 0% 99% / 0.9;
 
-    /* Gradients — blue only for cohesive brand */
-    --gradient-primary: linear-gradient(135deg, hsl(210 90% 50%) 0%, hsl(212 88% 48%) 50%, hsl(214 84% 46%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(210 90% 50%) 0%, hsl(222 85% 54%) 100%);
+    /* Gradients — paper-like subtle transitions */
+    --gradient-primary: linear-gradient(135deg, hsl(0 0% 9%) 0%, hsl(0 0% 15%) 50%, hsl(0 0% 20%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 0% 98%) 100%);
     --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.1) 0%, hsl(0 0% 100% / 0.05) 100%);
-    --gradient-surface: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(220 16% 99%) 100%);
+    --gradient-surface: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 0% 99%) 100%);
 
-    /* Enhanced shadows with depth */
-    --shadow-soft: 0 1px 3px 0 hsl(215 28% 17% / 0.08), 0 1px 2px -1px hsl(215 28% 17% / 0.08);
-    --shadow-medium: 0 4px 6px -1px hsl(215 28% 17% / 0.1), 0 2px 4px -2px hsl(215 28% 17% / 0.1);
-    --shadow-strong: 0 10px 15px -3px hsl(215 28% 17% / 0.1), 0 4px 6px -4px hsl(215 28% 17% / 0.1);
-    --shadow-glass: 0 8px 32px 0 hsl(215 28% 17% / 0.08);
-    --shadow-elevated: 0 20px 25px -5px hsl(215 28% 17% / 0.1), 0 8px 10px -6px hsl(215 28% 17% / 0.1);
+    /* Paper-like shadows with subtle depth */
+    --shadow-soft: 0 1px 3px 0 hsl(0 0% 0% / 0.06), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
+    --shadow-medium: 0 4px 6px -1px hsl(0 0% 0% / 0.08), 0 2px 4px -2px hsl(0 0% 0% / 0.08);
+    --shadow-strong: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+    --shadow-glass: 0 8px 32px 0 hsl(0 0% 0% / 0.06);
+    --shadow-elevated: 0 20px 25px -5px hsl(0 0% 0% / 0.08), 0 8px 10px -6px hsl(0 0% 0% / 0.08);
 
     /* Enhanced animations with easing */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -127,55 +127,55 @@
   }
 
   .dark {
-    /* Core neutrals with enhanced contrast */
-    --background: 222 84% 4%;
-    --foreground: 210 40% 98%;
+    /* Core neutrals - inverted paper aesthetic */
+    --background: 0 0% 8%;
+    --foreground: 0 0% 96%;
 
-    /* Glass surfaces with dark backdrop */
-    --glass: 240 6% 10% / 0.9;
-    --glass-border: 240 5% 90% / 0.1;
-    --glass-hover: 240 6% 10% / 0.95;
+    /* Glass surfaces - dark paper texture */
+    --glass: 0 0% 10% / 0.9;
+    --glass-border: 0 0% 20% / 0.4;
+    --glass-hover: 0 0% 12% / 0.95;
 
-    /* Cards and surfaces with dark depth */
-    --card: 240 6% 6% / 0.95;
-    --card-foreground: 210 40% 98%;
-    --card-border: 240 4% 16% / 0.5;
+    /* Cards and surfaces - dark paper layers */
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 96%;
+    --card-border: 0 0% 20% / 0.6;
 
-    /* Elevated dark surfaces */
-    --surface: 240 6% 8%;
-    --surface-elevated: 240 6% 10%;
-    --surface-glass: 240 6% 10% / 0.9;
+    /* Elevated dark surfaces - subtle paper depth */
+    --surface: 0 0% 9%;
+    --surface-elevated: 0 0% 12%;
+    --surface-glass: 0 0% 11% / 0.9;
 
-    /* Popover with dark glass effect */
-    --popover: 240 6% 6% / 0.95;
-    --popover-foreground: 210 40% 98%;
-    --popover-border: 240 4% 16% / 0.3;
+    /* Popover - dark paper overlay */
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 96%;
+    --popover-border: 0 0% 20% / 0.5;
 
-    /* Primary brand — dark mode */
-    --primary: 210 90% 60%;
-    --primary-foreground: 222 84% 4%;
-    --primary-hover: 210 90% 66%;
-    --primary-active: 210 90% 72%;
-    --primary-glass: 210 90% 60% / 0.15;
-    --primary-soft: 210 90% 9%;
+    /* Primary brand — clean white on dark */
+    --primary: 0 0% 96%;
+    --primary-foreground: 0 0% 8%;
+    --primary-hover: 0 0% 90%;
+    --primary-active: 0 0% 85%;
+    --primary-glass: 0 0% 96% / 0.15;
+    --primary-soft: 0 0% 15%;
 
-    /* Secondary - Dark refined neutrals */
-    --secondary: 217 32% 15%;
-    --secondary-foreground: 210 40% 98%;
-    --secondary-hover: 217 32% 20%;
-    --secondary-glass: 217 32% 15% / 0.9;
+    /* Secondary - dark paper grays */
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 96%;
+    --secondary-hover: 0 0% 18%;
+    --secondary-glass: 0 0% 15% / 0.9;
 
-    /* Muted content with dark hierarchy */
-    --muted: 217 32% 15%;
-    --muted-foreground: 215 20% 65%;
-    --muted-glass: 217 32% 15% / 0.7;
+    /* Muted content - dark gray hierarchy */
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --muted-glass: 0 0% 15% / 0.8;
 
-    /* Accent — calm cyan in dark */
-    --accent: 200 95% 55%;
-    --accent-foreground: 222 84% 4%;
-    --accent-hover: 200 95% 60%;
-    --accent-glass: 200 95% 55% / 0.15;
-    --accent-soft: 200 95% 10%;
+    /* Accent — subtle light gray */
+    --accent: 0 0% 80%;
+    --accent-foreground: 0 0% 8%;
+    --accent-hover: 0 0% 75%;
+    --accent-glass: 0 0% 80% / 0.15;
+    --accent-soft: 0 0% 12%;
 
     /* Destructive - Enhanced dark red */
     --destructive: 0 84% 65%;
@@ -184,42 +184,42 @@
     --destructive-glass: 0 84% 65% / 0.15;
     --destructive-soft: 0 84% 8%;
 
-    /* Borders and inputs with dark glass */
-    --border: 240 4% 16% / 0.6;
-    --border-strong: 240 4% 20%;
-    --input: 240 6% 10% / 0.9;
-    --input-border: 240 4% 16% / 0.4;
-    --ring: 214 89% 58% / 0.4;
+    /* Borders and inputs - dark paper lines */
+    --border: 0 0% 20% / 0.8;
+    --border-strong: 0 0% 25%;
+    --input: 0 0% 10%;
+    --input-border: 0 0% 20% / 0.6;
+    --ring: 0 0% 96% / 0.4;
 
-    /* Sidebar with enhanced dark glass */
-    --sidebar-background: 222 84% 6% / 0.95;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 214 89% 58%;
-    --sidebar-primary-foreground: 222 84% 4%;
-    --sidebar-accent: 222 84% 16% / 0.9;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 84% 16% / 0.3;
-    --sidebar-ring: 214 89% 58% / 0.4;
-    --sidebar-glass: 222 84% 8% / 0.95;
+    /* Sidebar - dark paper aesthetic */
+    --sidebar-background: 0 0% 9% / 0.95;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 0 0% 96%;
+    --sidebar-primary-foreground: 0 0% 8%;
+    --sidebar-accent: 0 0% 15% / 0.9;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 0% 20% / 0.4;
+    --sidebar-ring: 0 0% 96% / 0.4;
+    --sidebar-glass: 0 0% 10% / 0.98;
 
-    /* Chat interface with dark glass */
-    --chat-message-user: 214 89% 58%;
-    --chat-message-assistant: 217 32% 15% / 0.9;
-    --chat-input: 240 6% 10% / 0.95;
-    --chat-bubble-glass: 240 6% 10% / 0.9;
+    /* Chat interface - dark paper bubbles */
+    --chat-message-user: 0 0% 96%;
+    --chat-message-assistant: 0 0% 15%;
+    --chat-input: 0 0% 10%;
+    --chat-bubble-glass: 0 0% 12% / 0.9;
 
-    /* Dark gradients — blue only */
-    --gradient-primary: linear-gradient(135deg, hsl(210 90% 60%) 0%, hsl(212 88% 58%) 50%, hsl(214 84% 56%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(210 90% 60%) 0%, hsl(222 85% 58%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(240 6% 10% / 0.1) 0%, hsl(240 6% 10% / 0.05) 100%);
-    --gradient-surface: linear-gradient(135deg, hsl(240 6% 6%) 0%, hsl(240 6% 8%) 100%);
+    /* Dark gradients — paper-like subtle transitions */
+    --gradient-primary: linear-gradient(135deg, hsl(0 0% 96%) 0%, hsl(0 0% 90%) 50%, hsl(0 0% 85%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 8%) 0%, hsl(0 0% 10%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(0 0% 10% / 0.1) 0%, hsl(0 0% 10% / 0.05) 100%);
+    --gradient-surface: linear-gradient(135deg, hsl(0 0% 8%) 0%, hsl(0 0% 10%) 100%);
 
-    /* Enhanced dark shadows */
-    --shadow-soft: 0 1px 3px 0 hsl(0 0% 0% / 0.3), 0 1px 2px -1px hsl(0 0% 0% / 0.3);
-    --shadow-medium: 0 4px 6px -1px hsl(0 0% 0% / 0.4), 0 2px 4px -2px hsl(0 0% 0% / 0.4);
-    --shadow-strong: 0 10px 15px -3px hsl(0 0% 0% / 0.4), 0 4px 6px -4px hsl(0 0% 0% / 0.4);
-    --shadow-glass: 0 8px 32px 0 hsl(0 0% 0% / 0.3);
-    --shadow-elevated: 0 20px 25px -5px hsl(0 0% 0% / 0.4), 0 8px 10px -6px hsl(0 0% 0% / 0.4);
+    /* Dark paper shadows with depth */
+    --shadow-soft: 0 1px 3px 0 hsl(0 0% 0% / 0.4), 0 1px 2px -1px hsl(0 0% 0% / 0.4);
+    --shadow-medium: 0 4px 6px -1px hsl(0 0% 0% / 0.5), 0 2px 4px -2px hsl(0 0% 0% / 0.5);
+    --shadow-strong: 0 10px 15px -3px hsl(0 0% 0% / 0.5), 0 4px 6px -4px hsl(0 0% 0% / 0.5);
+    --shadow-glass: 0 8px 32px 0 hsl(0 0% 0% / 0.4);
+    --shadow-elevated: 0 20px 25px -5px hsl(0 0% 0% / 0.5), 0 8px 10px -6px hsl(0 0% 0% / 0.5);
   }
 }
 
@@ -231,6 +231,10 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  }
+
+  .font-courier {
+    font-family: 'Courier Prime', 'Courier New', Courier, monospace;
   }
 
   /* Glass effect utilities */
@@ -283,18 +287,15 @@
 /* ===== Hero / Section transition helpers ===== */
 
 /* Make hero text readable over media */
-.hero-overlay h1,
-.hero-overlay p {
-  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-}
+/* Removed text shadows for clean text appearance */
 
-/* Fade the bottom of the hero into the next section */
+/* Fade the bottom of the hero into the next section - very subtle */
 .hero-fade {
   position: absolute;
   inset-inline: 0;
   bottom: 0;
-  height: 120px; /* adjust for longer/shorter fade */
-  background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, #ffffff 100%);
+  height: 30px; /* much smaller fade */
+  background: linear-gradient(to bottom, hsla(0, 0%, 100%, 0) 0%, hsla(0, 0%, 100%, 0.8) 100%);
   pointer-events: none;
 }
 
@@ -312,7 +313,7 @@
 /* Dark-mode variants */
 .dark .hero-fade,
 [data-theme="dark"] .hero-fade {
-  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 100%);
+  background: linear-gradient(to bottom, hsla(0, 0%, 8%, 0) 0%, hsla(0, 0%, 8%, 0.8) 100%);
 }
 .dark .hero-glow,
 [data-theme="dark"] .hero-glow {
@@ -323,10 +324,10 @@
 /* OS-level dark preference fallback (if no theme class is set) */
 @media (prefers-color-scheme: dark) {
   .hero-fade:not(.force-light) {
-    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 100%);
+    background: linear-gradient(to bottom, hsla(0, 0%, 8%, 0) 0%, hsla(0, 0%, 8%, 0.8) 100%);
   }
   .hero-glow:not(.force-light) {
-    background: radial-gradient(120% 120% at 50% 100%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 60%);
+    background: radial-gradient(120% 120% at 50% 100%, hsla(0, 0%, 8%, 0.55) 0%, hsla(0, 0%, 8%, 0) 60%);
     mix-blend-mode: normal;
   }
 }

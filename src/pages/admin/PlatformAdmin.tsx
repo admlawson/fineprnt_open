@@ -68,7 +68,7 @@ export const PlatformAdmin: React.FC = () => {
   const { data: adminJobs = [], isLoading: jobsLoading } = useAdminProcessingJobs();
 
   useEffect(() => {
-    document.title = 'Platform Admin — omniclause';
+    document.title = 'Platform Admin — fineprnt';
   }, []);
 
   // Using server-side search via usePlatformAdminData(orgSearch)

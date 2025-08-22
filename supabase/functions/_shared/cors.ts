@@ -2,8 +2,8 @@ export const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:8080',
   'https://c68dbad9-c9de-44cf-934e-6f3e7dabce63.lovableproject.com',
-  'https://omniclause.com',
-  'https://www.omniclause.com',
+  'https://fineprnt.com',
+  'https://www.fineprnt.com',
 ];
 
 export const baseCorsHeaders = {
@@ -21,7 +21,7 @@ export function buildCorsHeaders(origin?: string) {
   }
   
   // For production, default to the main domain
-  const defaultOrigin = 'https://www.omniclause.com';
+  const defaultOrigin = 'https://www.fineprnt.com';
   return {
     ...baseCorsHeaders,
     'Access-Control-Allow-Origin': defaultOrigin,

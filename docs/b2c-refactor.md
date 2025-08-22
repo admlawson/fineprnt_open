@@ -1,6 +1,6 @@
 ## Goal
 
-Pivot omniclause from org-centric B2B to **B2C per-user** subscriptions with Stripe. Keep data isolation, but remove org-first flows from the default path.
+Pivot fineprnt from org-centric B2B to **B2C per-user** subscriptions with Stripe. Keep data isolation, but remove org-first flows from the default path.
 
 ## Plans & gates
 

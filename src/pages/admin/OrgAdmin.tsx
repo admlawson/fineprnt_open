@@ -425,7 +425,7 @@ export const OrgAdmin: React.FC = () => {
                   Subscription
                 </CardTitle>
                 <CardDescription>
-                  Enterprise agreement managed by omniclause.
+                  Enterprise agreement managed by fineprnt.
                 </CardDescription>
               </CardHeader>
               <CardContent>

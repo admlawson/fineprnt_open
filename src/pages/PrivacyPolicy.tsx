@@ -4,8 +4,8 @@ import MarketingFooter from "@/components/layout/MarketingFooter";
 
 const PrivacyPolicy: React.FC = () => {
   React.useEffect(() => {
-    const title = "omniclause Privacy Policy"; // <60 chars
-    const description = "omniclause Privacy Policy for US users: data use, retention, security, and your rights."; // <=160 chars
+    const title = "fineprnt Privacy Policy"; // <60 chars
+    const description = "fineprnt Privacy Policy for US users: data use, retention, security, and your rights."; // <=160 chars
     document.title = title;
 
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
@@ -28,7 +28,7 @@ const PrivacyPolicy: React.FC = () => {
     const ld = {
       '@context': 'https://schema.org',
       '@type': 'WebPage',
-      name: 'omniclause Privacy Policy',
+      name: 'fineprnt Privacy Policy',
       url: window.location.href,
       description,
     } as const;
@@ -49,11 +49,11 @@ const PrivacyPolicy: React.FC = () => {
       <main role="main" className="px-4 py-10">
         <article className="container mx-auto max-w-3xl">
           <header className="mb-8">
-            <h1 className="text-3xl font-bold">omniclause Privacy Policy</h1>
+            <h1 className="text-3xl font-bold">fineprnt Privacy Policy</h1>
             <p className="text-sm text-muted-foreground mt-2">Effective Date: August 15, 2025</p>
             <p className="text-sm text-muted-foreground">Owner/Operator: Symbian Labs Inc. ("Symbian Labs," "we," "us," or "our")</p>
-            <p className="text-sm text-muted-foreground">Service: omniclause (the "Service"), a retrieval-augmented chat application that enables users to upload and converse with medical contracts in plain English.</p>
-            <p className="text-sm text-muted-foreground">Contact (Privacy): <a className="underline" href="mailto:privacy@omniclause.com">privacy@omniclause.com</a> • Contact (Support): <a className="underline" href="mailto:support@omniclause.com">support@omniclause.com</a></p>
+            <p className="text-sm text-muted-foreground">Service: fineprnt (the "Service"), a retrieval-augmented chat application that enables users to upload and converse with medical contracts in plain English.</p>
+            <p className="text-sm text-muted-foreground">Contact (Privacy): <a className="underline" href="mailto:privacy@fineprnt.com">privacy@fineprnt.com</a> • Contact (Support): <a className="underline" href="mailto:support@fineprnt.com">support@fineprnt.com</a></p>
           </header>
 
           <aside className="mb-8">
@@ -96,8 +96,8 @@ const PrivacyPolicy: React.FC = () => {
 
           <section id="scope-roles" className="mb-8">
             <h2 className="text-2xl font-semibold mb-2">1. Scope & Roles</h2>
-            <p>This Privacy Policy explains how Symbian Labs processes Personal Information in connection with your use of omniclause. It applies to business customers, their end users (e.g., employees/contractors), and individual practitioners in the United States.</p>
-            <p className="mt-3"><strong>Not for PHI:</strong> omniclause is not intended for, and should not be used to process, Protected Health Information (PHI) under HIPAA. You agree not to upload PHI, patient data, or other sensitive personal information unrelated to contract analysis. We are not a “Business Associate” under HIPAA unless we enter into a signed BAA stating otherwise.</p>
+            <p>This Privacy Policy explains how Symbian Labs processes Personal Information in connection with your use of fineprnt. It applies to business customers, their end users (e.g., employees/contractors), and individual practitioners in the United States.</p>
+            <p className="mt-3"><strong>Not for PHI:</strong> fineprnt is not intended for, and should not be used to process, Protected Health Information (PHI) under HIPAA. You agree not to upload PHI, patient data, or other sensitive personal information unrelated to contract analysis. We are not a “Business Associate” under HIPAA unless we enter into a signed BAA stating otherwise.</p>
           </section>
 
           <section id="information-we-collect" className="mb-8">
@@ -147,7 +147,7 @@ const PrivacyPolicy: React.FC = () => {
 
           <section id="data-sharing" className="mb-8">
             <h2 className="text-2xl font-semibold mb-2">6. Data Sharing & Subprocessors</h2>
-            <p>We do not sell personal data. We share information only with service providers/subprocessors that help us operate omniclause:</p>
+            <p>We do not sell personal data. We share information only with service providers/subprocessors that help us operate fineprnt:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
               <li>Vercel (application hosting and delivery)</li>
               <li>Supabase (database, auth, storage, role-based access, audit logs)</li>
@@ -192,8 +192,8 @@ const PrivacyPolicy: React.FC = () => {
 
           <section id="privacy-rights" className="mb-8">
             <h2 className="text-2xl font-semibold mb-2">10. Your Privacy Choices & Rights</h2>
-            <p>In-product controls: Upload, manage, and delete your content in the app’s standard CRUD interface. You may also request account deletion via <a className="underline" href="mailto:privacy@omniclause.com">privacy@omniclause.com</a>.</p>
-            <p className="mt-2">US State Privacy Rights (e.g., CA, CO, CT, VA, UT): Depending on your state, you may have rights to access, correct, delete, obtain a portable copy, or appeal a rights decision. To exercise these rights, email privacy@omniclause.com with your request, state of residence, and a verifiable means of confirming your identity and account ownership. We do not “sell” personal information or “share” it for cross-context behavioral advertising as defined by the CPRA.</p>
+            <p>In-product controls: Upload, manage, and delete your content in the app’s standard CRUD interface. You may also request account deletion via <a className="underline" href="mailto:privacy@fineprnt.com">privacy@fineprnt.com</a>.</p>
+            <p className="mt-2">US State Privacy Rights (e.g., CA, CO, CT, VA, UT): Depending on your state, you may have rights to access, correct, delete, obtain a portable copy, or appeal a rights decision. To exercise these rights, email privacy@fineprnt.com with your request, state of residence, and a verifiable means of confirming your identity and account ownership. We do not “sell” personal information or “share” it for cross-context behavioral advertising as defined by the CPRA.</p>
             <p className="mt-2">If your request is denied, you may appeal by replying to our decision email. If unresolved, you may contact your state attorney general.</p>
           </section>
 
@@ -204,7 +204,7 @@ const PrivacyPolicy: React.FC = () => {
 
           <section id="childrens-privacy" className="mb-8">
             <h2 className="text-2xl font-semibold mb-2">12. Children’s Privacy</h2>
-            <p>omniclause is intended for adults in professional settings. We do not knowingly collect personal information from children under 13. If you believe a child has provided us information, contact <a className="underline" href="mailto:privacy@omniclause.com">privacy@omniclause.com</a> and we will delete it.</p>
+            <p>fineprnt is intended for adults in professional settings. We do not knowingly collect personal information from children under 13. If you believe a child has provided us information, contact <a className="underline" href="mailto:privacy@fineprnt.com">privacy@fineprnt.com</a> and we will delete it.</p>
           </section>
 
           <section id="automated-decision-making" className="mb-8">
@@ -214,7 +214,7 @@ const PrivacyPolicy: React.FC = () => {
 
           <section id="your-responsibilities" className="mb-8">
             <h2 className="text-2xl font-semibold mb-2">14. Your Responsibilities</h2>
-            <p>You are responsible for ensuring you have the rights and permissions to upload content to omniclause. You must not upload PHI, patient data, or other personal information that is not necessary for contract analysis. You also agree not to upload content that violates applicable laws or third-party rights.</p>
+            <p>You are responsible for ensuring you have the rights and permissions to upload content to fineprnt. You must not upload PHI, patient data, or other personal information that is not necessary for contract analysis. You also agree not to upload content that violates applicable laws or third-party rights.</p>
           </section>
 
           <section id="data-integrity" className="mb-8">
@@ -229,8 +229,8 @@ const PrivacyPolicy: React.FC = () => {
 
           <section id="contact" className="mb-8">
             <h2 className="text-2xl font-semibold mb-2">17. Contact Us</h2>
-            <p>Privacy & Rights Requests: <a className="underline" href="mailto:privacy@omniclause.com">privacy@omniclause.com</a></p>
-            <p>Support: <a className="underline" href="mailto:support@omniclause.com">support@omniclause.com</a></p>
+            <p>Privacy & Rights Requests: <a className="underline" href="mailto:privacy@fineprnt.com">privacy@fineprnt.com</a></p>
+            <p>Support: <a className="underline" href="mailto:support@fineprnt.com">support@fineprnt.com</a></p>
             <p className="mt-2 text-sm text-muted-foreground">Governing Law: This Policy and any disputes related to it are governed by the laws of the State of Delaware, excluding its conflicts of laws principles.</p>
           </section>
 

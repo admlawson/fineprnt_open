@@ -42,9 +42,9 @@ const TermsOfService: React.FC = () => {
 
   useEffect(() => {
     // SEO: title, meta description, canonical
-    document.title = "Terms of Service — omniclause";
+    document.title = "Terms of Service — fineprnt";
     const desc =
-      "omniclause Terms of Service for US-only professional use. No PHI; AI outputs informational; Stripe billing; contracts-focused.";
+      "fineprnt Terms of Service for US-only professional use. No PHI; AI outputs informational; Stripe billing; contracts-focused.";
     let meta = document.querySelector(
       'meta[name="description"]'
     ) as HTMLMetaElement | null;
@@ -135,7 +135,7 @@ const TermsOfService: React.FC = () => {
           <article className="md:col-span-9">
             <section id="top" className="surface-glass rounded-2xl border border-border p-6 md:p-10">
               <header className="mb-6">
-                <h1 className="text-3xl font-bold tracking-tight">omniclause Terms of Service</h1>
+                <h1 className="text-3xl font-bold tracking-tight">fineprnt Terms of Service</h1>
                 <p className="mt-2 text-muted-foreground">
                   Effective Date: August 15, 2025
                 </p>
@@ -143,13 +143,13 @@ const TermsOfService: React.FC = () => {
                   Owner/Operator: Symbian Labs Inc. ("Symbian Labs," "we," "us," or "our")
                 </p>
                 <p className="mt-1 text-muted-foreground">
-                  Service: omniclause (the "Service"), a retrieval-augmented chat application that enables users to upload and converse with medical contracts in plain English.
+                  Service: fineprnt (the "Service"), a retrieval-augmented chat application that enables users to upload and converse with medical contracts in plain English.
                 </p>
                 <p className="mt-1 text-muted-foreground">
                   Privacy: See our <Link to="/privacypolicy" className="underline underline-offset-4 hover:text-foreground">Privacy Policy</Link>, which is incorporated by reference.
                 </p>
                 <p className="mt-1 text-muted-foreground">
-                  Contact: <a href="mailto:support@omniclause.com" className="underline underline-offset-4">support@omniclause.com</a> (support) • <a href="mailto:privacy@omniclause.com" className="underline underline-offset-4">privacy@omniclause.com</a> (privacy)
+                  Contact: <a href="mailto:support@fineprnt.com" className="underline underline-offset-4">support@fineprnt.com</a> (support) • <a href="mailto:privacy@fineprnt.com" className="underline underline-offset-4">privacy@fineprnt.com</a> (privacy)
                 </p>
               </header>
 
@@ -371,7 +371,7 @@ const TermsOfService: React.FC = () => {
                     <span className="font-medium">Force Majeure.</span> Neither party is liable for delays or failures due to events beyond reasonable control.
                   </li>
                   <li>
-                    <span className="font-medium">Notices.</span> We may provide notices via the Service or email to your account email; you may provide legal notices to <a href="mailto:legal@omniclause.com" className="underline underline-offset-4">legal@omniclause.com</a> (or as otherwise designated) and a copy to <a href="mailto:support@omniclause.com" className="underline underline-offset-4">support@omniclause.com</a>.
+                    <span className="font-medium">Notices.</span> We may provide notices via the Service or email to your account email; you may provide legal notices to <a href="mailto:legal@fineprnt.com" className="underline underline-offset-4">legal@fineprnt.com</a> (or as otherwise designated) and a copy to <a href="mailto:support@fineprnt.com" className="underline underline-offset-4">support@fineprnt.com</a>.
                   </li>
                   <li>
                     <span className="font-medium">Severability; Waiver.</span> If any provision is unenforceable, the remainder remains in effect. Failure to enforce a provision is not a waiver.

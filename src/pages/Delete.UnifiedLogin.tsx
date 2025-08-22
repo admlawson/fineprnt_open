@@ -381,7 +381,7 @@ export const UnifiedLogin = () => {
           <div className="text-left">
             <div className="font-medium">Continue with Email & Password</div>
             <div className="text-sm text-muted-foreground">
-              Use your omniclause account credentials
+              Use your fineprnt account credentials
             </div>
           </div>
         </Button>
@@ -397,7 +397,7 @@ export const UnifiedLogin = () => {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Welcome to omniclause</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome to fineprnt</CardTitle>
           <CardDescription>
             Healthcare Contract Intelligence Platform
           </CardDescription>

@@ -98,7 +98,7 @@ export const EnhancedLogin: React.FC = () => {
   const renderEmailStep = () => (
     <>
       <CardHeader className="text-center">
-        <CardTitle>Welcome to omniclause</CardTitle>
+        <CardTitle>Welcome to fineprnt</CardTitle>
         <CardDescription>
           Enter your email to get started
         </CardDescription>

@@ -101,21 +101,64 @@ async function processWithMistralOCR(document: DocumentDetails): Promise<OCRResu
 
   const mistralClient = new Mistral({ apiKey: mistralApiKey });
   
+  console.log(`Uploading file to Mistral: ${document.filename}, size: ${fileContent.byteLength} bytes`);
   const uploadedFile = await mistralClient.files.upload({
     file: { fileName: document.filename, content: fileContent },
     purpose: "ocr"
   });
+  console.log(`File uploaded with ID: ${uploadedFile.id}`);
+
+  if (!uploadedFile?.id) {
+    throw new Error(`File upload failed - no file ID returned`);
+  }
+
+  // Verify file was uploaded successfully
+  const fileInfo = await mistralClient.files.retrieve({ fileId: uploadedFile.id });
+  console.log(`File verified: ${fileInfo.filename}, size: ${fileInfo.size_bytes} bytes`);
 
   const signedUrl = await mistralClient.files.getSignedUrl({ fileId: uploadedFile.id });
+  console.log(`Signed URL obtained for file ${uploadedFile.id}`);
 
-  // --- Pass 1: Full Text Extraction ---
-  const fullTextResponse = await mistralClient.ocr.process({
-    model: "mistral-ocr-latest",
-    document: { type: "document_url", documentUrl: signedUrl.url }
-  });
+  if (!signedUrl?.url) {
+    throw new Error(`Signed URL generation failed - no URL returned`);
+  }
 
-  if (!fullTextResponse.pages || fullTextResponse.pages.length === 0) {
-    throw new Error(`Mistral OCR returned no pages for ${document.filename} in Pass 1.`);
+  // Add delay to ensure file is fully processed on Mistral's end
+  console.log('Waiting for file to be ready...');
+  await new Promise(resolve => setTimeout(resolve, 3000));
+
+  // --- Pass 1: Full Text Extraction with Retry Logic ---
+  console.log(`Starting OCR Pass 1: Full text extraction for ${document.filename}`);
+  let fullTextResponse: any;
+  let lastError: any;
+  
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      console.log(`OCR attempt ${attempt}/3`);
+      fullTextResponse = await mistralClient.ocr.process({
+        model: "mistral-ocr-latest",
+        document: { type: "document_url", documentUrl: signedUrl.url }
+      });
+      
+      if (fullTextResponse.pages && fullTextResponse.pages.length > 0) {
+        console.log(`Pass 1 successful: extracted ${fullTextResponse.pages.length} pages`);
+        break;
+      } else {
+        throw new Error(`Mistral OCR returned no pages`);
+      }
+    } catch (error: any) {
+      lastError = error;
+      console.error(`OCR attempt ${attempt} failed:`, error.message);
+      
+      if (attempt < 3) {
+        console.log(`Waiting ${attempt * 2} seconds before retry...`);
+        await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+      }
+    }
+  }
+  
+  if (!fullTextResponse || !fullTextResponse.pages || fullTextResponse.pages.length === 0) {
+    throw new Error(`Mistral OCR failed after 3 attempts. Last error: ${lastError?.message || 'Unknown error'}`);
   }
 
   // --- Pass 2: Annotation Extraction (First 8 Pages) ---

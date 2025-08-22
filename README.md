@@ -1,6 +1,6 @@
 # Clause Chat Sim
 
-Clause Chat Sim (also branded as **omniclause**) is an AI‑powered platform for uploading, processing, and conversing with organizational documents such as medical contracts. The application combines a React front‑end, Supabase backend, and OpenAI models to deliver document chat with retrieval‑augmented generation (RAG).
+Clause Chat Sim (also branded as **fineprnt**) is an AI‑powered platform for uploading, processing, and conversing with organizational documents such as medical contracts. The application combines a React front‑end, Supabase backend, and OpenAI models to deliver document chat with retrieval‑augmented generation (RAG).
 
 ## Features
 
