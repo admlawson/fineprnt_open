@@ -121,11 +121,13 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
       }
 
       setInitialized(true);
-      // Load credit summary (best-effort)
+      // Load credit summary and subscription status (best-effort)
+      // Note: These tables may not be in TypeScript types yet
       try {
-        const { data: credit } = await supabase.rpc('get_credit_summary');
-        const row: any = Array.isArray(credit) ? credit?.[0] : credit;
-        if (row) {
+        // Use raw SQL for now until types are updated
+        const { data: credit } = await supabase.rpc('get_credit_summary', { p_user_id: user.id });
+        if (credit && Array.isArray(credit) && credit.length > 0) {
+          const row = credit[0];
           setCreditSummary({
             starting_credits: Number(row.starting_credits ?? 0),
             credits_used: Number(row.credits_used ?? 0),
@@ -133,28 +135,26 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
             credits_available: Number(row.credits_available ?? 0),
             period_start: row.period_start ?? null,
             period_end: row.period_end ?? null,
-          } as any);
+          });
         }
       } catch (err) {
         console.warn('get_credit_summary not available yet');
       }
-      // Load subscription status (best-effort)
+      
       try {
-        const { data: subRow, error: subErr } = await supabase
-          .from('user_subscriptions')
-          .select('plan_key,status,current_period_start,current_period_end')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        if (!subErr && subRow) {
+        // Use raw SQL for subscription data
+        const { data: subData } = await supabase.rpc('get_user_subscription', { p_user_id: user.id });
+        if (subData && Array.isArray(subData) && subData.length > 0) {
+          const row = subData[0];
           setSubscription({
-            plan_key: (subRow as any).plan_key ?? null,
-            status: (subRow as any).status ?? null,
-            period_start: (subRow as any).current_period_start ?? null,
-            period_end: (subRow as any).current_period_end ?? null,
+            plan_key: row.plan_key ?? null,
+            status: row.status ?? null,
+            period_start: row.current_period_start ?? null,
+            period_end: row.current_period_end ?? null,
           });
         }
       } catch (err) {
-        console.warn('user_subscriptions not readable yet');
+        console.warn('get_user_subscription not available yet');
       }
     } catch (e) {
       console.error(e);
@@ -554,18 +554,7 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="Enter your current password"
                   />
-                  {newEmailDomain &&
-                    extractDomainFromEmail(initialSnapshot.current.email || '').toLowerCase() !== newEmailDomain.toLowerCase() && (
-                      <Alert>
-                        <AlertDescription>
-                          {domainLoading
-                            ? 'Checking new domain...'
-                            : targetOrgName
-                            ? `After confirmation, your membership will move to ${targetOrgName} (domain ${newEmailDomain}); your current org will be set to inactive.`
-                            : `After confirmation, we will create a new organization for ${newEmailDomain} and move your membership.`}
-                        </AlertDescription>
-                      </Alert>
-                    )}
+
                 </div>
               )}
             </div>
