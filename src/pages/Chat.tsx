@@ -952,7 +952,7 @@ export const Chat: React.FC = () => {
           {/* Persistent disclaimer */}
           <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
             <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>AI can make mistakes. Check important info. Do not use PHI.</span>
+            <span>AI can make mistakes. Fineprnt is not legal advice. Check important info.</span>
           </div>
         </div>
       </div>
