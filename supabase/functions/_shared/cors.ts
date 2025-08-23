@@ -1,7 +1,6 @@
 export const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:8080',
-  'https://c68dbad9-c9de-44cf-934e-6f3e7dabce63.lovableproject.com',
   'https://fineprnt.com',
   'https://www.fineprnt.com',
 ];
