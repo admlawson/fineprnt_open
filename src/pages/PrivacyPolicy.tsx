@@ -50,7 +50,10 @@ const PrivacyPolicy: React.FC = () => {
     <div className="min-h-screen bg-background">
       <MarketingHeader />
 
-      <main role="main" className="px-4 py-10">
+      {/* Spacer to clear fixed marketing header */}
+      <div className="h-24 md:h-40" aria-hidden />
+
+      <main role="main" className="px-4 pb-10">
         <article className="container mx-auto max-w-3xl">
           <header className="mb-8">
             <h1 className="text-3xl font-bold">Fineprnt Privacy Policy</h1>
