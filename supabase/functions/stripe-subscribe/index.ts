@@ -9,7 +9,7 @@ const SITE_URL = Deno.env.get('SITE_URL') || 'https://www.fineprnt.com';
 // Defaults, can be overridden via env
 // Align defaults with webhook plan mapping; prefer env when available
 const BASIC_PRICE_ID = Deno.env.get('BASIC_PRICE_ID') || 'price_1RybToP6dw9IxGJAKZILFex3';
-const PRO_PRICE_ID = Deno.env.get('PRO_PRICE_ID') || 'price_1RzNQ8P6dw9IxGJA72c3cS3u';
+const PRO_PRICE_ID = Deno.env.get('PRO_PRICE_ID') || 'price_1RzO4AP6dw9IxGJAsyq372fc';
 
 async function getAuthedUserId(req: Request): Promise<string> {
   const authHeader = req.headers.get('Authorization');

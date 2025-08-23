@@ -41,7 +41,8 @@ import {
   FileType,
   RefreshCw,
   RotateCcw,
-  PlayCircle
+  PlayCircle,
+  CheckCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -62,6 +63,45 @@ interface Document {
   mime_type?: string;
 }
 
+interface ProcessingJob {
+  id: string;
+  document_id: string;
+  stage: 'ingest' | 'ocr' | 'annotation' | 'vectorization' | 'embed' | 'finalize';
+  status: 'queued' | 'processing' | 'done' | 'failed';
+  started_at?: string;
+  completed_at?: string;
+  created_at: string;
+  error_message?: string;
+}
+
+// Progress Pill Component
+const ProgressPill: React.FC<{ progress: number; isComplete?: boolean; stage?: string }> = ({ progress, isComplete = false, stage }) => {
+  return (
+    <div className="relative w-full h-8 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div 
+        className={`h-full transition-all duration-500 ease-out ${
+          isComplete 
+            ? 'bg-green-500' 
+            : 'bg-blue-500'
+        }`}
+        style={{ width: `${Math.min(progress, 100)}%` }}
+      />
+      <div className="absolute inset-0 flex items-center justify-center">
+        {isComplete ? (
+          <div className="flex items-center space-x-1 animate-in fade-in-0 zoom-in-95 duration-300">
+            <CheckCircle size={14} className="text-white" />
+            <span className="text-xs font-medium text-white drop-shadow-sm">Complete!</span>
+          </div>
+        ) : (
+          <span className="text-xs font-medium text-white drop-shadow-sm">
+            {stage ? `${stage} - ${Math.round(progress)}%` : `${Math.round(progress)}%`}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const Documents: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -71,9 +111,78 @@ export const Documents: React.FC = () => {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [newFilename, setNewFilename] = useState('');
   const [retryingDocuments, setRetryingDocuments] = useState<Set<string>>(new Set());
+  const [processingDocuments, setProcessingDocuments] = useState<Set<string>>(new Set());
+  const [processingProgress, setProcessingProgress] = useState<Record<string, number>>({});
+  const [processingJobs, setProcessingJobs] = useState<Record<string, ProcessingJob[]>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user, session } = useAuth();
+
+  // Calculate progress based on processing job stages and status
+  const calculateProgress = (jobs: ProcessingJob[]): { progress: number; currentStage: string } => {
+    if (!jobs || jobs.length === 0) return { progress: 0, currentStage: 'Starting...' };
+
+    const stageOrder = ['ingest', 'ocr', 'annotation', 'vectorization', 'embed', 'finalize'];
+    const totalStages = stageOrder.length;
+    
+    let completedStages = 0;
+    let currentStage = 'Starting...';
+    
+    for (const stage of stageOrder) {
+      const stageJob = jobs.find(job => job.stage === stage);
+      if (stageJob) {
+        if (stageJob.status === 'done') {
+          completedStages++;
+        } else if (stageJob.status === 'processing' || stageJob.status === 'queued') {
+          currentStage = stage;
+          break;
+        } else if (stageJob.status === 'failed') {
+          currentStage = `${stage} (failed)`;
+          break;
+        }
+      }
+    }
+    
+    const progress = (completedStages / totalStages) * 100;
+    return { progress, currentStage };
+  };
+
+  // Fetch processing jobs for a document
+  const fetchProcessingJobs = async (documentId: string) => {
+    if (!session?.user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('processing_jobs')
+        .select('*')
+        .eq('document_id', documentId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      const jobs = (data || []) as ProcessingJob[];
+      setProcessingJobs(prev => ({ ...prev, [documentId]: jobs }));
+
+      // Calculate and update progress
+      const { progress, currentStage } = calculateProgress(jobs);
+      setProcessingProgress(prev => ({ ...prev, [documentId]: progress }));
+
+      // Check if all stages are complete
+      const allComplete = jobs.every(job => job.status === 'done');
+      if (allComplete && progress === 100) {
+        // All processing complete, reset after showing completion
+        setTimeout(() => {
+          setProcessingDocuments(prev => { const ns = new Set(prev); ns.delete(documentId); return ns; });
+          setProcessingProgress(prev => { const { [documentId]: _, ...rest } = prev; return rest; });
+          setProcessingJobs(prev => { const { [documentId]: _, ...rest } = prev; return rest; });
+          fetchDocuments();
+        }, 2000);
+      }
+
+    } catch (error) {
+      console.error('Error fetching processing jobs:', error);
+    }
+  };
   
   const fetchDocuments = async () => {
     if (!session?.user?.id) return;
@@ -166,6 +275,7 @@ export const Documents: React.FC = () => {
 
     console.log(`Starting retry for document: ${document.id}`);
     setRetryingDocuments(prev => new Set(prev).add(document.id));
+    setProcessingProgress(prev => ({ ...prev, [document.id]: 0 }));
 
     try {
       // Reset document status to queued
@@ -243,8 +353,27 @@ export const Documents: React.FC = () => {
         description: `Document "${document.filename}" will be processed again.`,
       });
 
-      // Refresh documents to show updated status
-      setTimeout(() => fetchDocuments(), 1000);
+      // Start monitoring processing jobs for retry immediately and then every 2 seconds
+      await fetchProcessingJobs(document.id);
+      const monitorInterval = setInterval(async () => {
+        await fetchProcessingJobs(document.id);
+        
+        // Check if we should stop monitoring
+        const jobs = processingJobs[document.id] || [];
+        const allComplete = jobs.every(job => job.status === 'done');
+        const hasFailed = jobs.some(job => job.status === 'failed');
+        
+        if (allComplete || hasFailed) {
+          clearInterval(monitorInterval);
+          // Reset retry state
+          setRetryingDocuments(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(document.id);
+            return newSet;
+          });
+          setProcessingProgress(prev => { const { [document.id]: _, ...rest } = prev; return rest; });
+        }
+      }, 2000); // Check every 2 seconds
 
     } catch (error) {
       console.error('Error retrying document processing:', error);
@@ -253,18 +382,24 @@ export const Documents: React.FC = () => {
         description: "Failed to restart document processing. Please try again.",
         variant: "destructive",
       });
-    } finally {
+      
+      // Reset processing state on error
       setRetryingDocuments(prev => {
         const newSet = new Set(prev);
         newSet.delete(document.id);
         return newSet;
       });
+      setProcessingProgress(prev => { const { [document.id]: _, ...rest } = prev; return rest; });
     }
   };
 
   const handleProcess = async (document: Document) => {
     if (!session) return;
-    setRetryingDocuments(prev => new Set(prev).add(document.id));
+    
+    // Start processing state
+    setProcessingDocuments(prev => new Set(prev).add(document.id));
+    setProcessingProgress(prev => ({ ...prev, [document.id]: 0 }));
+    
     try {
       const { data: rpcData, error: rpcError } = await (supabase.rpc as any)('start_processing', { p_document_id: document.id });
       if (rpcError) throw rpcError;
@@ -274,18 +409,37 @@ export const Documents: React.FC = () => {
         toast({ title: 'Cannot process', description: reason === 'insufficient_credits' ? 'Insufficient credits. Upgrade or buy a document credit.' : 'No active period. Please subscribe.', variant: 'destructive' });
         return;
       }
+
       await fetch(functionUrl('ocr_and_annotation'), {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ trigger: 'start', document_id: document.id })
       });
+
       toast({ title: 'Processing started', description: `Document "${document.filename}" is queued.` });
-      setTimeout(() => fetchDocuments(), 800);
+      
+      // Start monitoring processing jobs immediately and then every 2 seconds
+      await fetchProcessingJobs(document.id);
+      const monitorInterval = setInterval(async () => {
+        await fetchProcessingJobs(document.id);
+        
+        // Check if we should stop monitoring
+        const jobs = processingJobs[document.id] || [];
+        const allComplete = jobs.every(job => job.status === 'done');
+        const hasFailed = jobs.some(job => job.status === 'failed');
+        
+        if (allComplete || hasFailed) {
+          clearInterval(monitorInterval);
+        }
+      }, 2000); // Check every 2 seconds
+      
     } catch (error) {
       console.error('Error starting processing:', error);
       toast({ title: 'Start failed', description: 'Failed to start processing.', variant: 'destructive' });
-    } finally {
-      setRetryingDocuments(prev => { const ns = new Set(prev); ns.delete(document.id); return ns; });
+      
+      // Reset processing state on error
+      setProcessingDocuments(prev => { const ns = new Set(prev); ns.delete(document.id); return ns; });
+      setProcessingProgress(prev => { const { [document.id]: _, ...rest } = prev; return rest; });
     }
   };
 
@@ -334,10 +488,32 @@ export const Documents: React.FC = () => {
           }
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'processing_jobs',
+          filter: `document_id=in.(${documents.map(d => d.id).join(',')})`
+        },
+        async (payload) => {
+          console.log('Processing job change:', payload);
+          
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const documentId = payload.new.document_id;
+            // Fetch updated processing jobs for this document
+            await fetchProcessingJobs(documentId);
+          }
+        }
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
+      // Clean up any processing state
+      setProcessingDocuments(new Set());
+      setProcessingProgress({});
+      setProcessingJobs({});
     };
   }, [session?.user?.id]);
 
@@ -761,46 +937,53 @@ export const Documents: React.FC = () => {
                   
                   {document.status === 'failed' ? (
                     <div className="flex space-x-2">
-                      <Button 
-                        className="flex-1" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleRetryProcessing(document)}
-                        disabled={retryingDocuments.has(document.id)}
-                      >
-                        {retryingDocuments.has(document.id) ? (
-                          <>
-                            <RefreshCw size={14} className="mr-2 animate-spin" />
-                            Retrying...
-                          </>
-                        ) : (
-                          <>
-                            <RotateCcw size={14} className="mr-2" />
-                            Retry
-                          </>
-                        )}
-                      </Button>
+                      {retryingDocuments.has(document.id) ? (
+                        <div className="flex-1 space-y-2">
+                          <ProgressPill 
+                            progress={processingProgress[document.id] || 0} 
+                            isComplete={processingProgress[document.id] === 100}
+                            stage={processingJobs[document.id]?.[0]?.stage}
+                          />
+                          <div className="text-xs text-center text-muted-foreground">
+                            {processingProgress[document.id] === 100 ? 'Retry complete!' : `Retrying: ${processingJobs[document.id]?.[0]?.stage || 'Starting...'}`}
+                          </div>
+                        </div>
+                      ) : (
+                        <Button 
+                          className="flex-1" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleRetryProcessing(document)}
+                        >
+                          <RotateCcw size={14} className="mr-2" />
+                          Retry
+                        </Button>
+                      )}
                     </div>
                   ) : document.status === 'uploaded' ? (
-                    <Button 
-                      className="w-full" 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleProcess(document)}
-                      disabled={retryingDocuments.has(document.id)}
-                    >
-                      {retryingDocuments.has(document.id) ? (
-                        <>
-                          <RefreshCw size={14} className="mr-2 animate-spin" />
-                          Starting...
-                        </>
-                      ) : (
-                        <>
-                          <PlayCircle size={14} className="mr-2" />
-                          Process
-                        </>
-                      )}
-                    </Button>
+                    processingDocuments.has(document.id) ? (
+                      <div className="space-y-2">
+                        <ProgressPill 
+                          progress={processingProgress[document.id] || 0} 
+                          isComplete={processingProgress[document.id] === 100}
+                          stage={processingJobs[document.id]?.[0]?.stage}
+                        />
+                        <div className="text-xs text-center text-muted-foreground">
+                          {processingProgress[document.id] === 100 ? 'Processing complete!' : `Processing: ${processingJobs[document.id]?.[0]?.stage || 'Starting...'}`}
+                        </div>
+                      </div>
+                    ) : (
+                      <Button 
+                        className="w-full" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleProcess(document)}
+                        disabled={retryingDocuments.has(document.id)}
+                      >
+                        <PlayCircle size={14} className="mr-2" />
+                        Process
+                      </Button>
+                    )
                   ) : document.status === 'completed' ? null : (
                     <Button 
                       className="w-full" 
