@@ -44,7 +44,7 @@ export function SubscriptionGate({ children, feature = 'this feature', fallback 
             <CardDescription>1 document/month • Unlimited chat</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-center">
-            <div className="text-2xl font-semibold">$40<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
+            <div className="text-2xl font-semibold">$20<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
             <Button
               className="w-full"
               onClick={async () => {
@@ -76,7 +76,7 @@ export function SubscriptionGate({ children, feature = 'this feature', fallback 
             <CardDescription>5 documents/month • Unlimited chat</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-center">
-            <div className="text-2xl font-semibold">$60<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
+            <div className="text-2xl font-semibold">$40<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
             <Button
               className="w-full"
               onClick={async () => {

@@ -5,7 +5,7 @@ const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
 const DOC_CREDIT_PRICE_ID = Deno.env.get('DOC_CREDIT_PRICE_ID') || 'price_1RwTBQP6dw9IxGJAiqtvn1TE';
-const SITE_URL = Deno.env.get('SITE_URL') || 'https://fineprnt.com';
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://www.fineprnt.com';
 
 async function getAuthedUserId(req: Request): Promise<string> {
   const authHeader = req.headers.get('Authorization');
