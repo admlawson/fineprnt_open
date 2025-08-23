@@ -21,6 +21,10 @@ const MarketingHeader: React.FC = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+  };
+
   const handleNav = (id: string) => {
     if (location.pathname === '/') {
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -98,6 +102,14 @@ const MarketingHeader: React.FC = () => {
             </Link>
             
             <div className="flex items-center gap-2">
+              {/* Theme toggle visible on mobile */}
+              <Button variant="ghost" size="sm" className="w-9 h-9 px-0" onClick={toggleTheme} aria-label="Toggle theme">
+                {resolvedTheme === 'dark' ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="w-9 h-9 px-0">
