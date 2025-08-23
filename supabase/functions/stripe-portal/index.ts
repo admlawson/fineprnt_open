@@ -15,7 +15,7 @@ async function getAuthedUserId(req: Request): Promise<string> {
 
 async function createPortal(customerId: string): Promise<string> {
   if (!STRIPE_SECRET_KEY) throw new Error('Missing STRIPE_SECRET_KEY');
-  const returnUrl = (Deno.env.get('SITE_URL') || 'https://fineprnt.com') + '/app/account';
+  const returnUrl = (Deno.env.get('SITE_URL') || 'https://www.fineprnt.com') + '/app/account';
   const form = new URLSearchParams({ customer: customerId, return_url: returnUrl });
   const res = await fetch('https://api.stripe.com/v1/billing_portal/sessions', {
     method: 'POST',

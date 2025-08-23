@@ -4,11 +4,12 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
-const SITE_URL = Deno.env.get('SITE_URL') || 'https://fineprnt.com';
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://www.fineprnt.com';
 
 // Defaults, can be overridden via env
-const BASIC_PRICE_ID = Deno.env.get('BASIC_PRICE_ID') || 'price_1RwTA1P6dw9IxGJArtXr6mz4';
-const PRO_PRICE_ID = Deno.env.get('PRO_PRICE_ID') || 'price_1RwTAlP6dw9IxGJADFkzcbOB';
+// Align defaults with webhook plan mapping; prefer env when available
+const BASIC_PRICE_ID = Deno.env.get('BASIC_PRICE_ID') || 'price_1RybToP6dw9IxGJAKZILFex3';
+const PRO_PRICE_ID = Deno.env.get('PRO_PRICE_ID') || 'price_1RzNQ8P6dw9IxGJA72c3cS3u';
 
 async function getAuthedUserId(req: Request): Promise<string> {
   const authHeader = req.headers.get('Authorization');
@@ -90,12 +91,7 @@ Deno.serve(async (req: Request) => {
     // Ensure downstream subscription events have user_id available
     form.set('subscription_data[metadata][user_id]', userId);
     form.set('subscription_data[metadata][plan]', plan === 'pro' ? 'pro' : 'basic');
-    // Attach customer email so Stripe recognizes returning customer in portal/checkout
-    const { data: authUser } = await admin.auth.getUser(userId);
-    const emailOverride = authUser?.user?.email;
-    if (emailOverride) {
-      form.set('customer_email', emailOverride);
-    }
+    // Do not set customer_email when customer is provided to avoid Stripe API conflicts
 
     const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',

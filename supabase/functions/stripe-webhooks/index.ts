@@ -6,7 +6,7 @@ interface StripeEvent {
 }
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Optional verification and plan mapping
@@ -369,6 +369,9 @@ async function handleCheckoutCompleted(evt: StripeEvent) {
 }
 
 Deno.serve(async (req: Request) => {
+  if (!supabaseServiceKey) {
+    return new Response('Missing SUPABASE_SERVICE_ROLE_KEY', { status: 500 });
+  }
   if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
   const raw = await req.text();
   const verified = await verifyStripeSignatureIfNeeded(req, raw);
