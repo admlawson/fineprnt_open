@@ -14,7 +14,8 @@ const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET') || '';
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY') || '';
 // Defaults populated from Stripe MCP discovery (non-secret)
 const BASIC_PRICE_ID = Deno.env.get('BASIC_PRICE_ID') || 'price_1RybToP6dw9IxGJAKZILFex3';
-const PRO_PRICE_ID = Deno.env.get('PRO_PRICE_ID') || 'price_1RybUxP6dw9IxGJAPrkGr2XH';
+// Use the proper recurring Pro price - the other one is one-time
+const PRO_PRICE_ID = Deno.env.get('PRO_PRICE_ID') || 'price_1RzO4AP6dw9IxGJAsyq372fc';
 // Product IDs are intentionally unused now; plan detection is price-ID only
 
 function resolvePlanKeyFromStripe(input: { price: any }): 'basic' | 'pro' {
@@ -246,17 +247,22 @@ async function handleSubscriptionUpdated(evt: StripeEvent) {
   const customerId = sub.customer as string;
   const status = sub.status as string;
   const lineItem = sub.items?.data?.[0];
+  
+  console.log('subscription.updated:', {
+    subscriptionId: sub.id,
+    customerId,
+    status,
+    priceId: lineItem?.price?.id,
+    lookup_key: lineItem?.price?.lookup_key,
+  });
+  
   // Always resolve from Stripe price; ignore metadata 'plan' to avoid stale downgrades
   const planKey = resolvePlanKeyFromStripe({ price: lineItem?.price });
-  try {
-    console.log('subscription.updated', {
-      priceId: lineItem?.price?.id,
-      lookup_key: lineItem?.price?.lookup_key,
-      planKey,
-    });
-  } catch {}
+  console.log('Resolved plan key:', planKey);
+  
   const rawStartIso = toIsoFromStripeTs(sub.current_period_start) || toIsoFromStripeTs(sub.current_period?.start) || new Date().toISOString();
   const { start: periodStart, end: periodEnd } = toMonthBucketBounds(rawStartIso);
+  
   // Upsert subscription snapshot
   // Prefer subscription.customer mapping or our snapshot; ignore plan metadata for plan resolution
   let userId = sub.metadata?.user_id as string | undefined;
@@ -269,8 +275,15 @@ async function handleSubscriptionUpdated(evt: StripeEvent) {
       }
     } catch {}
   }
-  if (!userId) return new Response('ignored-missing-user', { status: 200 });
-  await supabase.from('user_subscriptions').upsert({
+  
+  if (!userId) {
+    console.log('ignored: missing user_id for subscription:', sub.id);
+    return new Response('ignored-missing-user', { status: 200 });
+  }
+  
+  console.log('Upserting subscription for user:', userId, 'plan:', planKey, 'status:', status);
+  
+  const { error: subError } = await supabase.from('user_subscriptions').upsert({
     user_id: userId,
     plan_key: planKey,
     stripe_customer_id: customerId,
@@ -279,12 +292,21 @@ async function handleSubscriptionUpdated(evt: StripeEvent) {
     current_period_start: periodStart,
     current_period_end: periodEnd
   });
+  
+  if (subError) {
+    console.error('Failed to upsert subscription:', subError);
+  } else {
+    console.log('Successfully upserted subscription');
+  }
+  
   // Seed/refresh credits for this period on subscription changes as a safety net
   try {
     const startingCredits = planKey === 'pro' ? 5 : 1;
     await upsertCreditsNoDowngrade(userId, periodStart, periodEnd, startingCredits);
     await supabase.rpc('resume_awaiting_docs', { p_user_id: userId, p_max: 10 });
-  } catch (_) {}
+  } catch (error) {
+    console.error('Error seeding credits:', error);
+  }
   return new Response('ok', { status: 200 });
 }
 
@@ -292,7 +314,18 @@ async function handleCheckoutCompleted(evt: StripeEvent) {
   const session = evt.data.object;
   const userId = session?.metadata?.user_id as string | undefined;
   const qty = parseInt(session?.metadata?.quantity || '1');
-  if (!userId) return new Response('ignored', { status: 200 });
+  
+  console.log('checkout.session.completed:', {
+    userId,
+    purchase: session?.metadata?.purchase,
+    subscription: session?.subscription,
+    customer: session?.customer
+  });
+  
+  if (!userId) {
+    console.log('ignored: missing user_id in metadata');
+    return new Response('ignored', { status: 200 });
+  }
 
   // One-time Doc Credit purchase
   if (session?.metadata?.purchase === 'doc_credit') {
@@ -331,11 +364,20 @@ async function handleCheckoutCompleted(evt: StripeEvent) {
   // Subscription checkout completed: seed current period immediately
   try {
     const subId: string | undefined = session?.subscription as string | undefined;
-    if (!subId || !STRIPE_SECRET_KEY) return new Response('ok', { status: 200 });
+    if (!subId || !STRIPE_SECRET_KEY) {
+      console.log('ignored: missing subscription ID or Stripe key');
+      return new Response('ok', { status: 200 });
+    }
+    
+    console.log('Fetching subscription details for:', subId);
     const resp = await fetch(`https://api.stripe.com/v1/subscriptions/${subId}`, {
       headers: { Authorization: `Bearer ${STRIPE_SECRET_KEY}` },
     });
-    if (!resp.ok) return new Response('ok', { status: 200 });
+    if (!resp.ok) {
+      console.log('Failed to fetch subscription:', resp.status, resp.statusText);
+      return new Response('ok', { status: 200 });
+    }
+    
     const sub = await resp.json();
     const customerId = sub.customer as string;
     const status = sub.status as string;
@@ -344,8 +386,11 @@ async function handleCheckoutCompleted(evt: StripeEvent) {
     const planKey = resolvePlanKeyFromStripe({ price: sub.items?.data?.[0]?.price });
     const userIdFromSub: string | undefined = sub.metadata?.user_id || session?.metadata?.user_id;
     const targetUserId = userIdFromSub || userId;
+    
+    console.log('Upserting subscription for user:', targetUserId, 'plan:', planKey, 'status:', status);
+    
     // Upsert subscription snapshot
-    await supabase.from('user_subscriptions').upsert({
+    const { error: subError } = await supabase.from('user_subscriptions').upsert({
       user_id: targetUserId,
       plan_key: planKey,
       stripe_customer_id: customerId,
@@ -354,8 +399,15 @@ async function handleCheckoutCompleted(evt: StripeEvent) {
       current_period_start: periodStart,
       current_period_end: periodEnd,
     });
+    
+    if (subError) {
+      console.error('Failed to upsert subscription:', subError);
+    } else {
+      console.log('Successfully upserted subscription');
+    }
+    
     const startingCredits = planKey === 'pro' ? 5 : 1;
-    await supabase.from('document_credits').upsert({
+    const { error: creditError } = await supabase.from('document_credits').upsert({
       user_id: targetUserId,
       period_start: periodStart,
       period_end: periodEnd,
@@ -363,25 +415,42 @@ async function handleCheckoutCompleted(evt: StripeEvent) {
       credits_used: 0,
       overage_units: 0,
     }, { onConflict: 'user_id,period_start' });
+    
+    if (creditError) {
+      console.error('Failed to upsert credits:', creditError);
+    } else {
+      console.log('Successfully upserted credits:', startingCredits);
+    }
+    
     await supabase.rpc('resume_awaiting_docs', { p_user_id: targetUserId, p_max: 10 });
-  } catch (_) {}
+  } catch (error) {
+    console.error('Error in subscription checkout handler:', error);
+  }
   return new Response('ok', { status: 200 });
 }
 
 Deno.serve(async (req: Request) => {
   if (!supabaseServiceKey) {
+    console.error('Missing SUPABASE_SERVICE_ROLE_KEY');
     return new Response('Missing SUPABASE_SERVICE_ROLE_KEY', { status: 500 });
   }
   if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
   const raw = await req.text();
   const verified = await verifyStripeSignatureIfNeeded(req, raw);
-  if (!verified) return new Response('Invalid signature', { status: 400 });
+  if (!verified) {
+    console.error('Invalid Stripe signature');
+    return new Response('Invalid signature', { status: 400 });
+  }
   let event: StripeEvent;
   try {
     event = JSON.parse(raw) as StripeEvent;
   } catch {
+    console.error('Failed to parse webhook body');
     return new Response('Bad Request', { status: 400 });
   }
+  
+  console.log('Processing webhook event:', event.type, 'for customer:', event.data?.object?.customer);
+  
   switch (event.type) {
     case 'invoice.paid':
       return await handleInvoicePaid(event);
@@ -392,6 +461,7 @@ Deno.serve(async (req: Request) => {
     case 'customer.subscription.deleted':
       return await handleSubscriptionUpdated(event);
     default:
+      console.log('Ignoring webhook event type:', event.type);
       return new Response('ignored', { status: 200 });
   }
 });
