@@ -172,11 +172,11 @@ export const Landing: React.FC = () => {
         <section
           ref={heroRef}
           aria-label="Fineprnt — clarity on any contract in seconds"
-          className={`relative overflow-hidden ${isLandscapeCompact ? 'h-[88vh] pt-24' : 'h-[100vh] sm:h-[90vh] md:h-[85vh] pt-16 sm:pt-20 md:pt-16'}`}
+          className={`relative overflow-hidden ${isLandscapeCompact ? 'h-[88vh] pt-24' : 'h-[100vh] sm:h-[90vh] md:h-[85vh] pt-10 sm:pt-14 md:pt-16'}`}
         >
           {/* Floating icon stacks */}
           <div
-            className={`pointer-events-none absolute top-28 hidden sm:flex flex-col z-0 ${isLandscapeCompact ? 'gap-4' : 'gap-6'}`}
+            className={`pointer-events-none absolute top-20 sm:top-24 hidden sm:flex flex-col z-0 ${isLandscapeCompact ? 'gap-4' : 'gap-6'}`}
             style={{ transform: `translateY(${shakeY}px)`, left: isLandscapeCompact ? '0.5rem' : '1.75rem' }}
             aria-hidden
           >
@@ -185,7 +185,7 @@ export const Landing: React.FC = () => {
             <IconCard label="DOC" className="shake delay-1" Icon={File} />
           </div>
           <div
-            className={`pointer-events-none absolute top-32 hidden sm:flex flex-col z-0 ${isLandscapeCompact ? 'gap-4' : 'gap-6'}`}
+            className={`pointer-events-none absolute top-24 sm:top-28 hidden sm:flex flex-col z-0 ${isLandscapeCompact ? 'gap-4' : 'gap-6'}`}
             style={{ transform: `translateY(${-shakeY}px)`, right: isLandscapeCompact ? '0.5rem' : '1.75rem' }}
             aria-hidden
           >
