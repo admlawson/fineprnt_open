@@ -39,6 +39,8 @@ export const Landing: React.FC = () => {
 
   // "How it works" chat-demo state
   const [howTab, setHowTab] = React.useState<'lease' | 'bill' | 'offer' | 'subscription'>('lease');
+  // Detect compact landscape to adjust hero spacing/positions
+  const [isLandscapeCompact, setIsLandscapeCompact] = React.useState(false);
 
   const convos: Record<'lease' | 'bill' | 'offer' | 'subscription', { user: string; bot: string }[]> = {
     lease: [
@@ -73,6 +75,22 @@ export const Landing: React.FC = () => {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, [reduceMotion]);
+
+  // Layout watcher for landscape phones (short height)
+  React.useEffect(() => {
+    const update = () => {
+      const landscape = window.innerWidth > window.innerHeight;
+      const short = window.innerHeight <= 460; // iPhone landscape heights
+      setIsLandscapeCompact(landscape && short);
+    };
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('orientationchange', update as any);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('orientationchange', update as any);
+    };
+  }, []);
 
   // SEO
   React.useEffect(() => {
@@ -154,12 +172,12 @@ export const Landing: React.FC = () => {
         <section
           ref={heroRef}
           aria-label="Fineprnt — clarity on any contract in seconds"
-          className="relative h-[100vh] sm:h-[90vh] md:h-[85vh] overflow-hidden pt-16 sm:pt-20 md:pt-16"
+          className={`relative overflow-hidden ${isLandscapeCompact ? 'h-[88vh] pt-24' : 'h-[100vh] sm:h-[90vh] md:h-[85vh] pt-16 sm:pt-20 md:pt-16'}`}
         >
           {/* Floating icon stacks */}
           <div
-            className="pointer-events-none absolute left-7 top-28 hidden sm:flex flex-col gap-6 z-0"
-            style={{ transform: `translateY(${shakeY}px)` }}
+            className={`pointer-events-none absolute top-28 hidden sm:flex flex-col z-0 ${isLandscapeCompact ? 'gap-4' : 'gap-6'}`}
+            style={{ transform: `translateY(${shakeY}px)`, left: isLandscapeCompact ? '0.5rem' : '1.75rem' }}
             aria-hidden
           >
             <IconCard label="PDF" className="shake" Icon={FileText} />
@@ -167,8 +185,8 @@ export const Landing: React.FC = () => {
             <IconCard label="DOC" className="shake delay-1" Icon={File} />
           </div>
           <div
-            className="pointer-events-none absolute right-7 top-32 hidden sm:flex flex-col gap-6 z-0"
-            style={{ transform: `translateY(${-shakeY}px)` }}
+            className={`pointer-events-none absolute top-32 hidden sm:flex flex-col z-0 ${isLandscapeCompact ? 'gap-4' : 'gap-6'}`}
+            style={{ transform: `translateY(${-shakeY}px)`, right: isLandscapeCompact ? '0.5rem' : '1.75rem' }}
             aria-hidden
           >
             <IconCard label="DOC" className="shake delay-3" Icon={File} />
@@ -179,7 +197,7 @@ export const Landing: React.FC = () => {
           {/* Center content */}
           <div className="relative h-full flex items-center justify-center z-10">
             <div
-              className="mx-auto max-w-3xl text-center px-6 sm:px-8 md:px-12"
+              className={`mx-auto max-w-3xl text-center px-6 ${isLandscapeCompact ? 'sm:px-6' : 'sm:px-8'} md:px-12`}
               style={{ transform: reduceMotion ? undefined : `translateY(${offsetY * -0.05}px)` }}
             >
               {/* Fineprnt Logo */}
@@ -194,13 +212,13 @@ export const Landing: React.FC = () => {
                 }`} />
               </div>
 
-              <h1 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold tracking-tight leading-tight ${
+              <h1 className={`font-bold tracking-tight leading-tight ${isLandscapeCompact ? 'text-base sm:text-lg' : 'text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl'} ${
                 resolvedTheme === 'dark' ? 'text-white' : 'text-black'
               }`}>
                 Any Document. Any Question. Clarity in Seconds.
               </h1>
 
-              <p className={`mt-2 sm:mt-3 md:mt-4 text-xs sm:text-sm md:text-base max-w-xl sm:max-w-2xl mx-auto leading-relaxed ${
+              <p className={`mt-2 sm:mt-3 md:mt-4 ${isLandscapeCompact ? 'text-[11px]' : 'text-xs sm:text-sm md:text-base'} max-w-xl sm:max-w-2xl mx-auto leading-relaxed ${
                 resolvedTheme === 'dark' ? 'text-white/90' : 'text-black/80'
               }`}>
                 Don’t get caught in the fine print. Upload any contract. Ask in plain English. Get answers backed by actual receipts (citations).
