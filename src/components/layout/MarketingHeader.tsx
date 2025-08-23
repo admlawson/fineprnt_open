@@ -49,7 +49,7 @@ const MarketingHeader: React.FC = () => {
           )}>
             <button className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => handleNav('how-it-works')}>Product</button>
             <button className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => handleNav('features')}>Features</button>
-            <button className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => handleNav('security')}>Security</button>
+            <button className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => handleNav('pricing')}>Pricing</button>
             <button className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => handleNav('faq')}>FAQ</button>
           </nav>
 
@@ -112,8 +112,8 @@ const MarketingHeader: React.FC = () => {
                   <DropdownMenuItem onClick={() => handleNav('features')}>
                     Features
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleNav('security')}>
-                    Security
+                  <DropdownMenuItem onClick={() => handleNav('pricing')}>
+                    Pricing
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleNav('faq')}>
                     FAQ

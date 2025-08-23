@@ -5,19 +5,24 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 import {
   FileText,
+  FileImage,
+  File,            // NEW: generic file icon for DOC
   MessageSquare,
-  Shield,
   Zap,
   Search,
   CheckCircle2,
   XCircle,
   Lock,
   LineChart,
+  Scan,
+  Table,
+  Link as LinkIcon,
+  Quote,
+  ShieldCheck,
 } from 'lucide-react';
 
 import MarketingHeader from '@/components/layout/MarketingHeader';
@@ -31,8 +36,28 @@ export const Landing: React.FC = () => {
   const [offsetY, setOffsetY] = React.useState(0);
   const [reduceMotion, setReduceMotion] = React.useState(false);
   const heroRef = React.useRef<HTMLDivElement | null>(null);
-  // Decide when to use mobile-optimized hero media
-  const [useMobileHero, setUseMobileHero] = React.useState(false);
+
+  // "How it works" chat-demo state
+  const [howTab, setHowTab] = React.useState<'lease' | 'bill' | 'offer' | 'subscription'>('lease');
+
+  const convos: Record<'lease' | 'bill' | 'offer' | 'subscription', { user: string; bot: string }[]> = {
+    lease: [
+      { user: 'i have a gold fish and his name is bubbles', bot: '“Tenant may not permit, even temporarily, any pet on the Property (including but not limited to any mammal, reptile, bird, fish, rodent, or insect)” unless otherwise agreed in writing [p3, "9. PETS: A."].' },
+      { user: 'When is rent due?', bot: 'Rent is due on the 1st with a 5-day grace period [p.1].' },
+    ],
+    bill: [
+      { user: 'What am I being charged for?', bot: '$125 ER facility fee [p.2].' },
+      { user: 'Is there a duplicate charge?', bot: 'Yes — the lab panel appears twice; one is a duplicate [p.3].' },
+    ],
+    offer: [
+      { user: 'What does this non-compete mean?', bot: 'You can’t work for competitors for 12 months within 50 miles [p.3].' },
+      { user: 'When do options vest?', bot: '25% after 12 months, then monthly over 36 months [p.5].' },
+    ],
+    subscription: [
+      { user: 'How do I cancel?', bot: 'Notice required 30 days before renewal [p.5].' },
+      { user: 'Any hidden fees?', bot: 'A $15 reactivation fee applies if you pause and return [p.2].' },
+    ],
+  };
 
   React.useEffect(() => {
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -42,22 +67,6 @@ export const Landing: React.FC = () => {
     return () => mql.removeEventListener?.('change', set);
   }, []);
 
-  // Update hero asset choice based on aspect ratio / width
-  React.useEffect(() => {
-    const update = () => {
-      const narrowAspect = window.matchMedia('(max-aspect-ratio: 4/5)').matches;
-      const smallWidth = window.matchMedia('(max-width: 640px)').matches;
-      setUseMobileHero(narrowAspect || smallWidth);
-    };
-    update();
-    window.addEventListener('resize', update);
-    window.addEventListener('orientationchange', update as any);
-    return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('orientationchange', update as any);
-    };
-  }, []);
-
   React.useEffect(() => {
     if (reduceMotion) return;
     const onScroll = () => setOffsetY(window.scrollY || 0);
@@ -65,11 +74,11 @@ export const Landing: React.FC = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, [reduceMotion]);
 
-  // SEO: title, description, canonical, structured data
+  // SEO
   React.useEffect(() => {
-    const title = 'Fineprnt — Chat with Any Contract in Plain English';
+    const title = 'Fineprnt — Any Document. Any Question. Clarity in Seconds.';
     const description =
-      'Any Contract. Any Question, Clarity in Seconds. Dont get caught in the fine print. Upload any contract and ask any question in plain English. We handle the rest.';
+      'Don’t get caught in the fine print. Upload any contract. Ask in plain English. Get answers backed by actual receipts (citations).';
     document.title = title;
 
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
@@ -91,10 +100,10 @@ export const Landing: React.FC = () => {
     const ld = {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
-      name: 'fineprnt',
-      applicationCategory: 'BusinessApplication',
+      name: 'Fineprnt',
+      applicationCategory: 'ConsumerApplication',
       operatingSystem: 'Web',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      offers: { '@type': 'Offer', price: '20', priceCurrency: 'USD' },
       url: window.location.origin,
       description,
     } as const;
@@ -118,112 +127,59 @@ export const Landing: React.FC = () => {
     }
   }, [location.hash]);
 
-  const features = [
-    { icon: Zap, title: 'Calrity in Seconds', description: 'Upload, ask, and get plain‑English answers with citations fast.' },
-    { icon: Search, title: 'Proof you can act on', description: 'Every response cites the exact clause and page.' },
-    { icon: MessageSquare, title: 'No legal training required', description: 'Anyone can resolve fine print confidently.' },
-  ];
-
-  const testimonials = [
-    {
-      name: 'Independent Practice Manager',
-      role: '',
-      company: '',
-      quote:
-        'I used to spend nights combing through policies. Now I get answers in seconds—with the page number right there.',
-    },
-    {
-      name: 'Solo Practitioner',
-      role: '',
-      company: '',
-      quote:
-        'fineprnt caught a clause that would have cost me thousands. The citations make approvals painless.',
-    },
-  ];
+  // Small CSS for gentle shake + reduced motion
+  const shakeY = reduceMotion ? 0 : Math.min(8, offsetY * 0.03); // tiny parallax for stacks
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Local styles for animation */}
+      <style>{`
+        @keyframes gentleShake { 
+          0%,100% { transform: translateY(0) rotate(0deg); } 
+          25% { transform: translateY(-2px) rotate(-1.2deg);} 
+          50% { transform: translateY(1px) rotate(0.8deg);} 
+          75% { transform: translateY(-1px) rotate(-0.6deg);} 
+        }
+        .shake { animation: gentleShake 3.8s ease-in-out infinite; }
+        .shake.delay-1 { animation-delay: .5s; }
+        .shake.delay-2 { animation-delay: 1s; }
+        .shake.delay-3 { animation-delay: 1.5s; }
+        @media (prefers-reduced-motion: reduce) { .shake { animation: none !important; } }
+      `}</style>
+
       <MarketingHeader />
 
       <main role="main" id="content">
-        {/* HERO with parallax media */}
+        {/* HERO (icons-only, no video/image) */}
         <section
           ref={heroRef}
-          aria-label="Doctor helping a child—fineprnt helps you get clear answers from contracts"
+          aria-label="Fineprnt — clarity on any contract in seconds"
           className="relative h-[100vh] sm:h-[90vh] md:h-[85vh] overflow-hidden pt-16 sm:pt-20 md:pt-16"
         >
+          {/* Floating icon stacks */}
           <div
-            className="pointer-events-none absolute inset-0 z-0"
-            style={{ transform: reduceMotion ? undefined : `translateY(${offsetY * 0.15}px)` }}
+            className="pointer-events-none absolute left-7 top-28 hidden sm:flex flex-col gap-6 z-0"
+            style={{ transform: `translateY(${shakeY}px)` }}
+            aria-hidden
           >
-            {/* LCP-critical image - theme aware */}
-            <img
-              key={`hero-image-${resolvedTheme}-${useMobileHero ? 'm' : 'd'}`}
-              src={resolvedTheme === 'dark'
-                ? (useMobileHero
-                    ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-dark-mobile.png'
-                    : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark.png')
-                : (useMobileHero
-                    ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-light-mobile.png'
-                    : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light.png')
-              }
-              alt=""
-              className="absolute inset-0 h-full w-full hero-media"
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-            />
-            {/* Lightweight video only when motion is allowed - theme aware */}
-            {!reduceMotion && (
-              <video
-              key={`hero-video-${resolvedTheme}-${useMobileHero ? 'm' : 'd'}`}
-              className="absolute inset-0 h-full w-full hero-media"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster={resolvedTheme === 'dark'
-                ? (useMobileHero
-                    ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-dark-mobile.png'
-                    : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark.png')
-                : (useMobileHero
-                    ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-light-mobile.png'
-                    : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light.png')
-              }
-              aria-hidden="true"
-            >
-              <source
-                src={resolvedTheme === 'dark'
-                  ? (useMobileHero
-                      ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-dark-mobile.mp4'
-                      : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark-animated.mp4')
-                  : (useMobileHero
-                      ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-light-mobile.mp4'
-                      : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light-animated.mp4')
-                }
-                type="video/mp4"
-              />
-              <source
-                src={resolvedTheme === 'dark'
-                  ? (useMobileHero
-                      ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-dark-mobile.webm'
-                      : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-dark-animated.webm')
-                  : (useMobileHero
-                      ? 'https://api.fineprnt.com/storage/v1/object/public/website/fineprnt-light-mobile.webm'
-                      : 'https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt-hero-light-animated.webm')
-                }
-                type="video/webm"
-              />
-              Your browser does not support the video tag.
-              </video>
-            )}
-
+            <IconCard label="PDF" className="shake" Icon={FileText} />
+            <IconCard label="JPG" className="shake delay-2" Icon={FileImage} />
+            <IconCard label="DOC" className="shake delay-1" Icon={File} />
+          </div>
+          <div
+            className="pointer-events-none absolute right-7 top-32 hidden sm:flex flex-col gap-6 z-0"
+            style={{ transform: `translateY(${-shakeY}px)` }}
+            aria-hidden
+          >
+            <IconCard label="DOC" className="shake delay-3" Icon={File} />
+            <IconCard label="PDF" className="shake" Icon={FileText} />
+            <IconCard label="JPG" className="shake delay-1" Icon={FileImage} />
           </div>
 
-          <div className="relative h-full flex items-center justify-center">
+          {/* Center content */}
+          <div className="relative h-full flex items-center justify-center z-10">
             <div
-              className="mx-auto max-w-3xl text-center px-6 sm:px-8 md:px-12 hero-overlay"
+              className="mx-auto max-w-3xl text-center px-6 sm:px-8 md:px-12"
               style={{ transform: reduceMotion ? undefined : `translateY(${offsetY * -0.05}px)` }}
             >
               {/* Fineprnt Logo */}
@@ -235,7 +191,7 @@ export const Landing: React.FC = () => {
                 </div>
                 <div className={`w-14 sm:w-16 md:w-20 h-0.5 mx-auto mt-1 ${
                   resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'
-                }`}></div>
+                }`} />
               </div>
 
               <h1 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold tracking-tight leading-tight ${
@@ -247,12 +203,12 @@ export const Landing: React.FC = () => {
               <p className={`mt-2 sm:mt-3 md:mt-4 text-xs sm:text-sm md:text-base max-w-xl sm:max-w-2xl mx-auto leading-relaxed ${
                 resolvedTheme === 'dark' ? 'text-white/90' : 'text-black/80'
               }`}>
-                Dont get caught in the fine print. Upload any contract and ask questions in plain English.
+                Don’t get caught in the fine print. Upload any contract. Ask in plain English. Get answers backed by actual receipts (citations).
               </p>
 
               <div className="mt-3 sm:mt-4 md:mt-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-                <Button size="default" className="w-full sm:w-auto text-sm sm:text-base" onClick={() => navigate('/login')}>
-                  Start here
+                <Button size="default" className="w-full sm:w-auto text-sm sm:text-base" onClick={() => navigate('/login?plan=basic')}>
+                  Get started – $20/mo
                 </Button>
                 <Button
                   size="default"
@@ -260,7 +216,7 @@ export const Landing: React.FC = () => {
                   className="w-full sm:w-auto text-sm sm:text-base"
                   onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  How it works
+                  See how it works
                 </Button>
               </div>
 
@@ -268,133 +224,149 @@ export const Landing: React.FC = () => {
                 resolvedTheme === 'dark' ? 'text-white/90' : 'text-black/70'
               }`}>
                 <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                  <LineChart className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" /> 
-                  <span className="text-center">Clarity in seconds</span>
+                  <LineChart className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+                  <span>Clarity in seconds</span>
                 </div>
                 <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                  <Search className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" /> 
-                  <span className="text-center">Citations you can trust</span>
+                  <Search className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+                  <span>Receipts (citations)</span>
                 </div>
                 <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                  <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" /> 
-                  <span className="text-center">Guidance when needed</span>
+                  <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+                  <span>Plain English</span>
                 </div>
                 <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                  <Lock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" /> 
-                  <span className="text-center">Peace of mind</span>
+                  <Lock className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+                  <span>Peace of mind</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Blend hero into next section (helpers are defined in index.css) */}
+          {/* Optional divider fade */}
           <div className="hero-fade z-[1]" />
-          {/* <div className="hero-glow z-[1]" /> */}
         </section>
 
+        {/* HOW IT WORKS — macOS chat window with tabs */}
         <section id="how-it-works" className="px-4 py-14 section-muted has-top-divider">
-          <div className="container mx-auto">
-            <div className="text-center mb-10">
-              <Badge variant="secondary">How it works</Badge>
-              <h2 className="mt-3 text-3xl font-bold">From PDF to peace of mind</h2>
-              <p className="mt-2 text-muted-foreground">Made for individuals handling real-world payer paperwork</p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
-              <Card className="border-0 shadow-soft">
-                <CardHeader>
-                  <div className="w-10 h-10 rounded-md bg-primary/10 text-primary flex items-center justify-center mb-2">
-                    <FileText className="h-5 w-5" aria-hidden="true" />
-                  </div>
-                  <CardTitle>Upload</CardTitle>
-                  <CardDescription>Drop in any contract or policy PDF.</CardDescription>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">Drag-and-drop PDFs—no templates.</CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-soft">
-                <CardHeader>
-                  <div className="w-10 h-10 rounded-md bg-primary/10 text-primary flex items-center justify-center mb-2">
-                    <Zap className="h-5 w-5" aria-hidden="true" />
-                  </div>
-                  <CardTitle>We structure it for you</CardTitle>
-                  <CardDescription>AI pulls out clauses and keeps them citation-ready.</CardDescription>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">Pagination and headings stay intact for citations.</CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-soft">
-                <CardHeader>
-                  <div className="w-10 h-10 rounded-md bg-primary/10 text-primary flex items-center justify-center mb-2">
-                    <MessageSquare className="h-5 w-5" aria-hidden="true" />
-                  </div>
-                  <CardTitle>Ask anything</CardTitle>
-                  <CardDescription>“Does this contract cover X?” → instant answer with page number.</CardDescription>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">Share, export, and align teams.</CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 px-4 bg-muted/30">
           <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold">Before & After</h2>
-              <p className="mt-2 text-muted-foreground">From buried in PDFs to confident, citation‑backed answers.</p>
+            <div className="text-center mb-8">
+              <Badge variant="secondary">How it works</Badge>
+              <h2 className="mt-3 text-3xl font-bold">So simple it feels like cheating</h2>
+              <p className="mt-2 text-muted-foreground">Upload → Ask → Get the truth with receipts.</p>
             </div>
-            <div className="grid md:grid-cols-2 gap-6 place-items-center">
-              {/* Before card */}
-              <div className="w-full max-w-[460px] rounded-xl border border-destructive/20 bg-destructive/5 p-6 shadow-soft mx-auto">
-                <div className="flex items-center gap-2 mb-3">
-                  <XCircle className="h-5 w-5 text-destructive" aria-hidden="true" />
-                  <h3 className="text-lg font-semibold">Before fineprnt</h3>
+
+            <div className="rounded-2xl border border-border shadow-sm overflow-hidden">
+              {/* Title bar with mac stoplights + tabs */}
+              <div className="flex items-center justify-between border-b bg-background/60 backdrop-blur-sm px-4 py-2">
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-[#ff5f57]" aria-hidden />
+                  <span className="h-3 w-3 rounded-full bg-[#ffbd2e]" aria-hidden />
+                  <span className="h-3 w-3 rounded-full bg-[#28c840]" aria-hidden />
                 </div>
-                <ul className="space-y-3 text-sm">
-                  <li className="flex gap-2"><XCircle className="mt-0.5 h-4 w-4 text-destructive" aria-hidden="true" /> Hours lost searching clauses</li>
-                  <li className="flex gap-2"><XCircle className="mt-0.5 h-4 w-4 text-destructive" aria-hidden="true" /> Missed updates that cost real money</li>
-                  <li className="flex gap-2"><XCircle className="mt-0.5 h-4 w-4 text-destructive" aria-hidden="true" /> Stress over denials and compliance gaps</li>
-                </ul>
-                <div className="mt-5 flex flex-wrap gap-2 text-xs">
-                  <span className="rounded-full px-3 py-1 border border-destructive/30 text-destructive/90 bg-white/40 dark:bg-transparent">Manual review</span>
-                  <span className="rounded-full px-3 py-1 border border-destructive/30 text-destructive/90 bg-white/40 dark:bg-transparent">Uncertain citations</span>
+
+                {/* Tabs (desktop) */}
+                <div className="-mx-2 hidden sm:flex gap-1">
+                  {([
+                    { key: 'lease', label: 'Lease' },
+                    { key: 'bill', label: 'Bill' },
+                    { key: 'offer', label: 'Job Offer' },
+                    { key: 'subscription', label: 'Subscription' },
+                  ] as const).map((t) => (
+                    <button
+                      key={t.key}
+                      onClick={() => setHowTab(t.key)}
+                      className={`rounded-md px-3 py-1 text-sm ${howTab === t.key ? 'underline font-semibold' : 'opacity-70 hover:opacity-100'}`}
+                      aria-pressed={howTab === t.key}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Mobile select */}
+                <div className="sm:hidden">
+                  <label className="sr-only" htmlFor="how-tab">Choose example</label>
+                  <select
+                    id="how-tab"
+                    value={howTab}
+                    onChange={(e) => setHowTab(e.target.value as any)}
+                    className="rounded-md border bg-background px-2 py-1 text-sm"
+                  >
+                    <option value="lease">Lease</option>
+                    <option value="bill">Bill</option>
+                    <option value="offer">Job Offer</option>
+                    <option value="subscription">Subscription</option>
+                  </select>
                 </div>
               </div>
 
-              {/* After card */}
-              <div className="w-full max-w-[460px] rounded-xl border border-primary/20 bg-primary/5 p-6 shadow-soft mx-auto">
-                <div className="flex items-center gap-2 mb-3">
-                  <CheckCircle2 className="h-5 w-5 text-primary" aria-hidden="true" />
-                  <h3 className="text-lg font-semibold">After fineprnt</h3>
-                </div>
-                <ul className="space-y-3 text-sm">
-                  <li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" aria-hidden="true" /> Clear answers in seconds</li>
-                  <li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" aria-hidden="true" /> Citations on every claim</li>
-                  <li className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" aria-hidden="true" /> Confidence in audits and approvals</li>
+              {/* Chat body */}
+              <div className="p-4 bg-background/50">
+                <ul className="space-y-3">
+                  {convos[howTab].map((m, i) => (
+                    <li key={i} className="flex flex-col gap-2">
+                      {/* User bubble */}
+                      <div className="ml-auto max-w-[85%] rounded-2xl border bg-primary text-primary-foreground px-4 py-2 text-sm">
+                        <span className="opacity-90">{m.user}</span>
+                      </div>
+                      {/* Fineprnt bubble */}
+                      <div className="mr-auto max-w-[85%] rounded-2xl border bg-muted px-4 py-2 text-sm">
+                        <span className="opacity-90">{m.bot}</span>
+                      </div>
+                    </li>
+                  ))}
                 </ul>
-                <div className="mt-5 flex flex-wrap gap-2 text-xs">
-                  <span className="rounded-full px-3 py-1 border border-primary/30 text-primary bg-white/40 dark:bg-transparent">−80% time on reviews</span>
-                  <span className="rounded-full px-3 py-1 border border-primary/30 text-primary bg-white/40 dark:bg-transparent">Fewer denials</span>
-                  <span className="rounded-full px-3 py-1 border border-primary/30 text-primary bg-white/40 dark:bg-transparent">Audit‑ready</span>
-                </div>
+                <p className="mt-4 text-center text-xs text-muted-foreground">
+                  Answers include receipts with page/section references. Upload any contract; ask anything.
+                </p>
               </div>
-            </div>
-
-            <div className="text-center mt-10">
-              <p className="text-sm text-muted-foreground mb-4">Trade late‑night PDF dives for fast, cited answers.</p>
-              <Button size="lg" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>See pricing</Button>
             </div>
           </div>
         </section>
 
+        {/* DIFFERENTIATOR FLOW */}
+        <section id="how-we-work" className="px-6 py-20">
+          <div className="mx-auto max-w-[1000px] text-center">
+            <h2 className="font-modern text-3xl font-bold tracking-tight sm:text-4xl">
+              How Fineprnt actually works
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
+              Not just another GPT wrapper. Fineprnt processes your document step‑by‑step, preserving structure and delivering receipts you can trust.
+            </p>
+          </div>
+
+          {/* Horizontal flow with arrows */}
+          <div className="relative mt-12 flex flex-col items-center gap-8 md:mt-16 md:flex-row md:justify-between md:gap-4">
+            <FlowStep icon={<Scan className="h-6 w-6" />} title="OCR & ingestion" text="Any format (PDF, DOC, JPG). Scans converted to clean, searchable text." />
+            <Connector />
+            <FlowStep icon={<Table className="h-6 w-6" />} title="Extraction & structuring" text="Clauses, tables, riders and references pulled out and indexed for citation." />
+            <Connector />
+            <FlowStep icon={<LinkIcon className="h-6 w-6" />} title="Relational understanding" text="Links obligations, fees, and deadlines across sections for real context." />
+            <Connector />
+            <FlowStep icon={<Quote className="h-6 w-6" />} title="Clause‑level receipts" text="Every answer shows the exact page & section it came from." />
+            <Connector />
+            <FlowStep icon={<ShieldCheck className="h-6 w-6" />} title="Purpose‑built reasoning" text="Tuned for contracts — no hallucinated chit‑chat, just facts." />
+          </div>
+
+          <p className="mt-12 text-center text-sm italic text-muted-foreground">
+            GPT guesses. Fineprnt proves it.
+          </p>
+        </section>
+
+        {/* FEATURES */}
         <section id="features" className="py-16 px-4 bg-secondary/30">
           <div className="container mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold">Why Teams Rely on fineprnt</h2>
-              <p className="text-muted-foreground mt-2">Outcome‑driven answers that move work forward.</p>
+              <h2 className="text-3xl font-bold">Why people use Fineprnt</h2>
+              <p className="text-muted-foreground mt-2">Contracts are confusing. Fineprnt makes them clear.</p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {features.map((feature, index) => (
+              {[
+                { icon: LineChart, title: 'Clarity in seconds', description: 'Upload, ask, and get plain-English answers fast.' },
+                { icon: Search, title: 'Receipts you can trust', description: 'Every answer points to the exact clause and page.' },
+                { icon: MessageSquare, title: 'No legalese required', description: 'Ask in everyday language. We do the heavy lifting.' },
+              ].map((feature, index) => (
                 <Card key={index} className="group border-0 shadow-soft hover:shadow-medium transition">
                   <CardHeader>
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 bg-primary text-primary-foreground">
@@ -411,13 +383,13 @@ export const Landing: React.FC = () => {
           </div>
         </section>
 
-        {/* Pricing */}
+        {/* PRICING */}
         <section id="pricing" className="py-16 px-4">
           <div className="container mx-auto">
             <div className="text-center mb-10">
               <Badge variant="secondary">Pricing</Badge>
-              <h2 className="mt-3 text-3xl font-bold">Pick the plan that fits</h2>
-              <p className="mt-2 text-muted-foreground">Start Here. Upgrade when you need more documents.</p>
+              <h2 className="mt-3 text-3xl font-bold">Clarity costs less than confusion</h2>
+              <p className="mt-2 text-muted-foreground">Choose your plan — upgrade anytime.</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
@@ -425,7 +397,7 @@ export const Landing: React.FC = () => {
               <Card className="border-0 shadow-soft hover:shadow-medium transition">
                 <CardHeader>
                   <CardTitle>Basic</CardTitle>
-                  <CardDescription>For trying fineprnt on a single contract</CardDescription>
+                  <CardDescription>Great for a single contract</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -434,7 +406,7 @@ export const Landing: React.FC = () => {
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> 1 document / month</li>
                     <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Unlimited chat</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Clause‑level citations</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Clause-level receipts (citations)</li>
                   </ul>
                   <Button className="w-full" onClick={() => navigate('/login?plan=basic')}>Start with Basic</Button>
                 </CardContent>
@@ -445,7 +417,7 @@ export const Landing: React.FC = () => {
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary text-primary-foreground text-xs px-3 py-1 shadow-soft">Most popular</div>
                 <CardHeader>
                   <CardTitle>Pro</CardTitle>
-                  <CardDescription>For ongoing work and multiple contracts</CardDescription>
+                  <CardDescription>For ongoing reviews and multiple docs</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -460,78 +432,42 @@ export const Landing: React.FC = () => {
                 </CardContent>
               </Card>
 
-              {/* One‑time credit */}
+              {/* One-time credit */}
               <Card className="border-0 shadow-soft hover:shadow-medium transition">
                 <CardHeader>
-                  <CardTitle>One‑time credit</CardTitle>
-                  <CardDescription>Need just one more document this month?</CardDescription>
+                  <CardTitle>One-time credit</CardTitle>
+                  <CardDescription>Need more documents this month?</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <div className="text-3xl font-bold">$12<span className="text-sm font-normal text-muted-foreground"> one‑time</span></div>
+                    <div className="text-3xl font-bold">$12<span className="text-sm font-normal text-muted-foreground"> one-time</span></div>
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Adds 1 document credit</li>
                     <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Works with any plan</li>
                   </ul>
-                  <Button className="w-full" variant="outline" onClick={() => navigate('/login?purchase=credit')}>Buy a credit</Button>
+                  
                 </CardContent>
               </Card>
             </div>
           </div>
         </section>
 
-        {/* Impact CTA: text + image */}
-        <section className="px-4 py-16">
-          <div className="container mx-auto max-w-6xl grid md:grid-cols-2 gap-8 items-center">
-            {/* Copy */}
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs md:text-sm">
-                Built for real care, not just paperwork
-              </div>
-              <h2 className="mt-4 text-3xl md:text-4xl font-bold tracking-tight">
-                Less time on paperwork means more time with patients
-              </h2>
-              <p className="mt-4 text-muted-foreground">
-                Ask once, see the source, and move on
-              </p>
-              <p className="mt-1 text-muted-foreground">
-                The answer you need, with the citation you can trust
-              </p>
-              <blockquote className="mt-6 text-sm italic text-muted-foreground/90">
-                “Behind every claim is a patient. Behind every denial is lost care. fineprnt helps your team fight for both.”
-              </blockquote>
-              <div className="mt-6 flex gap-3">
-                <Button size="lg" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>View pricing</Button>
-                <Button size="lg" variant="outline" onClick={() => navigate('/login')}>Start Here</Button>
-              </div>
-            </div>
-            {/* Image */}
-            <div className="relative">
-              <img
-                src="https://api.fineprnt.com/storage/v1/object/public/website/public/EmotionalCTA.png"
-                alt="Clinician reassuring a patient — focus on care, not paperwork"
-                className="w-full h-auto rounded-xl shadow-medium object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-          </div>
-        </section>
-
+        {/* TESTIMONIALS */}
         <section className="py-16 px-4">
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold">What people say</h2>
             </div>
             <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-              {testimonials.map((testimonial, index) => (
+              {[
+                { name: 'Independent Renter', quote: 'I almost missed a $250 fee in my lease. Fineprnt flagged it with the exact page. Sold.' },
+                { name: 'New Hire', quote: 'The offer looked great until the non-compete. Fineprnt put the fine print in plain English.' },
+              ].map((t, index) => (
                 <Card key={index} className="border-0 shadow-soft">
                   <CardContent className="pt-6">
-                    <p className="text-lg mb-4 italic">"{testimonial.quote}"</p>
-                    <div>
-                      <p className="font-semibold">{testimonial.name}</p>
-                    </div>
+                    <p className="text-lg mb-4 italic">"{t.quote}"</p>
+                    <div><p className="font-semibold">{t.name}</p></div>
                   </CardContent>
                 </Card>
               ))}
@@ -539,49 +475,51 @@ export const Landing: React.FC = () => {
           </div>
         </section>
 
+        {/* FAQ */}
         <section id="faq" className="py-16 px-4 bg-secondary/30">
           <div className="container mx-auto max-w-3xl">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold">Frequently asked questions</h2>
-              <p className="text-muted-foreground mt-2">Everything you need to know about fineprnt.</p>
+              <p className="text-muted-foreground mt-2">Everything you need to know about Fineprnt.</p>
             </div>
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1">
-                <AccordionTrigger>What kinds of documents work best?</AccordionTrigger>
+                <AccordionTrigger>What file types do you support?</AccordionTrigger>
                 <AccordionContent>
-                  Payer contracts, riders, medical policies, and related guidance. Upload PDFs and we handle OCR and structure for reliable citations.
+                  PDF, DOC, JPG. and more.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2">
-                <AccordionTrigger>How do citations work?</AccordionTrigger>
+                <AccordionTrigger>Can I upload multiple files at once?</AccordionTrigger>
                 <AccordionContent>
-                  Every answer includes citations to the original clause and page so reviewers can validate context immediately.
+                  Not yet. Right now, Fineprnt supports one combined upload per document.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
-                <AccordionTrigger>Can teams collaborate?</AccordionTrigger>
+                <AccordionTrigger>Is this legal advice?</AccordionTrigger>
                 <AccordionContent>
-                  Not currently. We are hard at work to add this and other features to the application.
+                  No. Fineprnt makes contracts clear, but it’s not a substitute for a lawyer.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-4">
-                <AccordionTrigger>How is our data protected?</AccordionTrigger>
+                <AccordionTrigger>Is my data safe?</AccordionTrigger>
                 <AccordionContent>
-                  Data is encrypted in transit and at rest with fine-grained authorization controls.
+                  Yes. All files are encrypted in transit and at rest.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
           </div>
         </section>
 
+        {/* FINAL CTA */}
         <section className="py-20 px-4 bg-gradient-primary">
           <div className="container mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4 text-primary-foreground">Stop guessing. Start recovering what you’ve earned.</h2>
+            <h2 className="text-3xl font-bold mb-4 text-primary-foreground">Never sign blind again.</h2>
             <p className="text-xl text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-              fineprnt gives you clarity, confidence, and control — in minutes.
+              From leases to offers to surprise bills - Fineprnt shows you the truth before it costs you.
             </p>
-            <Button size="lg" variant="secondary" onClick={() => navigate('/login')}>
-              Start Here today
+            <Button size="lg" variant="secondary" onClick={() => navigate('/login?plan=basic')}>
+              Get started – $20/mo
             </Button>
           </div>
         </section>
@@ -591,3 +529,41 @@ export const Landing: React.FC = () => {
     </div>
   );
 };
+
+/** Small presentational icon card for the hero */
+function IconCard({
+  label,
+  className = '',
+  Icon,
+}: {
+  label: string;
+  className?: string;
+  Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+}) {
+  return (
+    <div className={`relative flex h-20 w-16 flex-col items-center justify-center rounded-lg border px-2 py-3 shadow-sm bg-background ${className}`}>
+      <Icon className="h-8 w-8 opacity-80" aria-hidden />
+      <span className="mt-1 text-[10px] font-semibold opacity-80" aria-hidden>
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function FlowStep({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+  return (
+    <div className="relative z-10 flex w-full max-w-[220px] flex-col items-center text-center md:max-w-[180px]">
+      <div className="grid h-12 w-12 place-items-center rounded-xl border bg-background shadow-sm">
+        {icon}
+      </div>
+      <h3 className="mt-3 font-modern text-base font-semibold">{title}</h3>
+      <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{text}</p>
+    </div>
+  );
+}
+
+function Connector() {
+  return (
+    <div className="hidden md:block flex-1 h-px border-t border-dashed border-border mx-2" aria-hidden />
+  );
+}

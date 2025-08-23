@@ -252,6 +252,14 @@
 }
 
 @layer utilities {
+  /* Icon shake used by hero FileBadge */
+  @keyframes gentleShake { 0%,100%{ transform: translateY(0) rotate(0deg); } 25%{ transform: translateY(-2px) rotate(-1.2deg);} 50%{ transform: translateY(1px) rotate(0.8deg);} 75%{ transform: translateY(-1px) rotate(-0.6deg);} }
+  .shake { animation: gentleShake 3.8s ease-in-out infinite; }
+  .shake.delay-1 { animation-delay: .5s }
+  .shake.delay-2 { animation-delay: 1s }
+  .shake.delay-3 { animation-delay: 1.5s }
+
+  @media (prefers-reduced-motion: reduce) { .shake { animation: none !important; } }
   /* Enhanced transitions */
   .transition-spring {
     transition: var(--transition-spring);
