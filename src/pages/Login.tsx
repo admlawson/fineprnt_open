@@ -113,7 +113,9 @@ export const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <MarketingHeader />
-      <div className="flex-1 flex items-center justify-center bg-secondary/30 px-4 py-12">
+      {/* Spacer to prevent header overlap on smaller viewports */}
+      <div className="h-24 md:h-20" aria-hidden />
+      <div className="flex-1 flex items-start md:items-center justify-center bg-secondary/30 px-4 py-8 md:py-12">
         <div className="w-full max-w-md space-y-6">
           {/* Header */}
           <div className="text-center">
