@@ -24,11 +24,13 @@ import { functionUrl } from '@/lib/supabaseEndpoints';
 interface UserProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onAvatarUpdate?: (avatarPath: string | null) => void;
 }
 
 export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
   open,
   onOpenChange,
+  onAvatarUpdate,
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -78,6 +80,7 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
   const validateDisplayName = (name: string) => name.trim().length >= 2;
   const validateEmail = (email: string) => /.+@.+\..+/.test(email);
 
+  // Load profile data
   const loadProfile = useCallback(async () => {
     if (!user) return;
     try {
@@ -112,12 +115,13 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
 
       // Generate a signed URL for current avatar if present
       if (data?.avatar_path) {
-        const { data: signed, error: signErr } = await supabase.storage
-          .from('avatars')
-          .createSignedUrl(data.avatar_path, 60 * 60); // 1 hour
-        if (!signErr) setAvatarUrl(signed?.signedUrl || null);
+        await generateAvatarUrl(data.avatar_path);
+        // Notify parent component about current avatar
+        onAvatarUpdate?.(data.avatar_path);
       } else {
         setAvatarUrl(null);
+        // Notify parent component that no avatar exists
+        onAvatarUpdate?.(null);
       }
 
       setInitialized(true);
@@ -165,6 +169,31 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
       });
     }
   }, [toast, user]);
+
+  // Generate avatar URL helper function
+  const generateAvatarUrl = useCallback(async (avatarPath: string) => {
+    try {
+      const { data: signed, error: signErr } = await supabase.storage
+        .from('avatars')
+        .createSignedUrl(avatarPath, 60 * 60); // 1 hour
+      if (!signErr && signed?.signedUrl) {
+        setAvatarUrl(signed.signedUrl);
+      } else {
+        console.warn('Failed to generate avatar URL:', signErr);
+        setAvatarUrl(null);
+      }
+    } catch (error) {
+      console.error('Error generating avatar URL:', error);
+      setAvatarUrl(null);
+    }
+  }, []);
+
+  // Load avatar URL when component mounts or avatar path changes
+  useEffect(() => {
+    if (avatarPath) {
+      generateAvatarUrl(avatarPath);
+    }
+  }, [avatarPath, generateAvatarUrl]);
 
   useEffect(() => {
     if (open) {
@@ -237,12 +266,11 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
 
         setAvatarPath(path);
 
-        // Signed URL for preview
-        const { data: signed, error: signErr } = await supabase.storage
-          .from('avatars')
-          .createSignedUrl(path, 60 * 60);
-        if (signErr) throw signErr;
-        setAvatarUrl(signed?.signedUrl || null);
+        // Generate signed URL for preview
+        await generateAvatarUrl(path);
+        
+        // Notify parent component about avatar update
+        onAvatarUpdate?.(path);
 
         setUploadProgress(100);
         toast({ title: 'Profile photo updated' });

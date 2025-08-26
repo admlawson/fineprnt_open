@@ -86,6 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
   const [credits, setCredits] = useState<{ available: number; total: number } | null>(null);
   const [subStatus, setSubStatus] = useState<string | null>(null);
   const [showStartSub, setShowStartSub] = useState(false);
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Fetch chat sessions and documents
@@ -137,7 +138,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
     };
   }, [user?.id]);
 
-  // Load credits and subscription status
+  // Load credits, subscription status, and user avatar
   useEffect(() => {
     const loadCredits = async () => {
       if (!user?.id) return;
@@ -179,8 +180,39 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
       }
     };
 
+    const loadUserAvatar = async () => {
+      if (!user?.id) return;
+      
+      try {
+        // First try to get avatar path from profiles table
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('avatar_path')
+          .eq('id', user.id)
+          .maybeSingle();
+        
+        if (profileData?.avatar_path) {
+          // Generate signed URL for avatar
+          const { data: signed, error: signErr } = await supabase.storage
+            .from('avatars')
+            .createSignedUrl(profileData.avatar_path, 60 * 60); // 1 hour
+          if (!signErr && signed?.signedUrl) {
+            setUserAvatarUrl(signed.signedUrl);
+          } else {
+            setUserAvatarUrl(null);
+          }
+        } else {
+          setUserAvatarUrl(null);
+        }
+      } catch (err) {
+        console.warn('Failed to load user avatar:', err);
+        setUserAvatarUrl(null);
+      }
+    };
+
     loadCredits();
     loadSub();
+    loadUserAvatar();
 
     // Realtime: refresh credits when consumption events occur or credits table changes
     const channel = supabase
@@ -206,6 +238,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
         const newStatus = (payload as any)?.new?.status;
         if (newStatus === 'completed') {
           loadCredits();
+        }
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'profiles',
+        filter: `id=eq.${user?.id || ''}`
+      }, (payload) => {
+        const newAvatarPath = (payload as any)?.new?.avatar_path;
+        if (newAvatarPath) {
+          // Refresh avatar when profile is updated
+          supabase.storage
+            .from('avatars')
+            .createSignedUrl(newAvatarPath, 60 * 60)
+            .then(({ data: signed, error: signErr }) => {
+              if (!signErr && signed?.signedUrl) {
+                setUserAvatarUrl(signed.signedUrl);
+              }
+            })
+            .catch(() => setUserAvatarUrl(null));
+        } else {
+          setUserAvatarUrl(null);
         }
       })
       .subscribe();
@@ -687,9 +741,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-8 px-2">
                       <Avatar className="h-5 w-5">
-                        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                          {user.avatar || user.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
+                        {userAvatarUrl ? (
+                          <AvatarImage src={userAvatarUrl} alt="User avatar" />
+                        ) : (
+                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                            {user.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        )}
                       </Avatar>
                       {!collapsed && (
                         <span className="ml-2 text-xs">{user.name.split(' ')[0]}</span>
@@ -812,7 +870,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
       {/* User Profile Dialog */}
       <UserProfileDialog 
         open={showProfileDialog} 
-        onOpenChange={setShowProfileDialog} 
+        onOpenChange={setShowProfileDialog}
+        onAvatarUpdate={(avatarPath) => {
+          if (avatarPath) {
+            // Refresh avatar in sidebar when profile dialog updates it
+            supabase.storage
+              .from('avatars')
+              .createSignedUrl(avatarPath, 60 * 60)
+              .then(({ data: signed, error: signErr }) => {
+                if (!signErr && signed?.signedUrl) {
+                  setUserAvatarUrl(signed.signedUrl);
+                }
+              })
+              .catch(() => setUserAvatarUrl(null));
+          } else {
+            setUserAvatarUrl(null);
+          }
+        }}
       />
       <SubscriptionStartDialog open={showStartSub} onOpenChange={setShowStartSub} />
     </>
