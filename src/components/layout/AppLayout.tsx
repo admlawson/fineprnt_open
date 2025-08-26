@@ -12,30 +12,42 @@ export const AppLayout: React.FC = () => {
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
+      console.log('Mobile check:', { width: window.innerWidth, isMobile: mobile, currentState: sidebarCollapsed });
       setIsMobile(mobile);
       
       // Auto-collapse sidebar on mobile
       if (mobile && !sidebarCollapsed) {
+        console.log('Auto-collapsing sidebar on mobile');
         setSidebarCollapsed(true);
       }
     };
 
+    // Initial check
     checkMobile();
+    
+    // Add event listeners
     window.addEventListener('resize', checkMobile);
+    window.addEventListener('orientationchange', checkMobile);
 
-    return () => window.removeEventListener('resize', checkMobile);
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      window.removeEventListener('orientationchange', checkMobile);
+    };
   }, [sidebarCollapsed]);
 
   // Auto-collapse sidebar on mobile when navigating
   useEffect(() => {
     if (isMobile) {
+      console.log('Auto-collapsing sidebar on navigation');
       setSidebarCollapsed(true);
     }
   }, [location.pathname, isMobile]);
 
   // Handle sidebar toggle
   const handleSidebarToggle = () => {
+    console.log('Sidebar toggle called, current state:', sidebarCollapsed);
     setSidebarCollapsed(!sidebarCollapsed);
+    console.log('New state will be:', !sidebarCollapsed);
   };
 
   return (
