@@ -77,7 +77,7 @@ interface ProcessingJob {
 // Progress Pill Component
 const ProgressPill: React.FC<{ progress: number; isComplete?: boolean; stage?: string }> = ({ progress, isComplete = false, stage }) => {
   return (
-    <div className="relative w-full h-8 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+    <div className="relative w-full h-6 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
       <div 
         className={`h-full transition-all duration-500 ease-out ${
           isComplete 
@@ -86,15 +86,20 @@ const ProgressPill: React.FC<{ progress: number; isComplete?: boolean; stage?: s
         }`}
         style={{ width: `${Math.min(progress, 100)}%` }}
       />
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center px-2">
         {isComplete ? (
           <div className="flex items-center space-x-1 animate-in fade-in-0 zoom-in-95 duration-300">
-            <CheckCircle size={14} className="text-white" />
-            <span className="text-xs font-medium text-white drop-shadow-sm">Complete!</span>
+            <CheckCircle size={12} className="text-white sm:w-3.5 sm:h-3.5" />
+            <span className="text-xs font-medium text-white drop-shadow-sm hidden sm:inline">Complete!</span>
+            <span className="text-xs font-medium text-white drop-shadow-sm sm:hidden">Done!</span>
           </div>
         ) : (
-          <span className="text-xs font-medium text-white drop-shadow-sm">
-            {stage ? `${stage} - ${Math.round(progress)}%` : `${Math.round(progress)}%`}
+          <span className="text-xs font-medium text-white drop-shadow-sm truncate">
+            {stage ? (
+              <span className="hidden sm:inline">{stage} - {Math.round(progress)}%</span>
+            ) : (
+              <span>{Math.round(progress)}%</span>
+            )}
           </span>
         )}
       </div>
@@ -788,40 +793,50 @@ export const Documents: React.FC = () => {
     <SubscriptionGate feature="document management">
       <div className="flex flex-col h-full bg-background">
         {/* Header */}
-        <div className="p-6 border-b border-border">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-semibold">Document Library</h1>
-              <p className="text-muted-foreground">
-                Upload and manage your healthcare contracts and agreements
-              </p>
-            </div>
-          <div className="flex space-x-2">
-            <Button variant="outline" onClick={fetchDocuments} disabled={loading}>
+        <div className="p-4 sm:p-6 border-b border-border">
+          {/* Title and Description Section */}
+          <div className="mb-4 sm:mb-6">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-2">Document Library</h1>
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+              Upload and manage your healthcare contracts and agreements
+            </p>
+          </div>
+
+          {/* Action Buttons Section */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <Button 
+              variant="outline" 
+              onClick={fetchDocuments} 
+              disabled={loading}
+              className="w-full sm:w-auto justify-center sm:justify-start"
+            >
               <RefreshCw size={16} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
-            <Button onClick={handleUpload} disabled={uploading}>
+            <Button 
+              onClick={handleUpload} 
+              disabled={uploading}
+              className="w-full sm:w-auto justify-center sm:justify-start"
+            >
               <Upload size={16} className="mr-2" />
               {uploading ? 'Uploading...' : 'Upload Document'}
             </Button>
           </div>
+          
+          {/* Search Section */}
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
+            <Input
+              placeholder="Search documents..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 w-full"
+            />
+          </div>
         </div>
-        
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
-          <Input
-            placeholder="Search documents..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
 
       {/* Document Grid */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center space-y-4">
@@ -851,18 +866,18 @@ export const Documents: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {filteredDocuments.map((document) => (
               <Card key={document.id} className="hover:shadow-medium transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
+                <CardHeader className="pb-3 px-4 sm:px-6">
+                  <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center space-x-2">
                       <FileText size={16} className="text-muted-foreground" />
                       {getStatusBadge(document.status)}
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                           <MoreVertical size={16} />
                         </Button>
                       </DropdownMenuTrigger>
@@ -906,26 +921,26 @@ export const Documents: React.FC = () => {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                  <CardTitle className="text-base line-clamp-2">
+                  <CardTitle className="text-sm sm:text-base line-clamp-2 leading-tight">
                     {document.filename}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 px-4 sm:px-6 pb-4 sm:pb-6">
                   <Badge 
                     variant="secondary" 
-                    className={getTypeColor(document.type)}
+                    className={`${getTypeColor(document.type)} text-xs sm:text-sm`}
                   >
                     {document.type}
                   </Badge>
                   
-                  <div className="space-y-2 text-sm text-muted-foreground">
+                  <div className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                     <div className="flex items-center space-x-2">
                       <FileType size={14} />
                       <span>{document.size}</span>
                       {document.pages && (
                         <>
-                          <span>•</span>
-                          <span>{document.pages} pages</span>
+                          <span className="hidden sm:inline">•</span>
+                          <span className="hidden sm:inline">{document.pages} pages</span>
                         </>
                       )}
                     </div>
@@ -936,7 +951,7 @@ export const Documents: React.FC = () => {
                   </div>
                   
                   {document.status === 'failed' ? (
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                       {retryingDocuments.has(document.id) ? (
                         <div className="flex-1 space-y-2">
                           <ProgressPill 
@@ -950,7 +965,7 @@ export const Documents: React.FC = () => {
                         </div>
                       ) : (
                         <Button 
-                          className="flex-1" 
+                          className="w-full sm:flex-1" 
                           variant="outline" 
                           size="sm"
                           onClick={() => handleRetryProcessing(document)}
