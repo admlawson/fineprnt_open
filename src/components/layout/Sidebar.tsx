@@ -5,6 +5,13 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   MessageSquare, 
@@ -18,7 +25,12 @@ import {
   Trash2,
   Edit2,
   Check,
-  X
+  X,
+  Sun,
+  Moon,
+  Monitor,
+  LogOut,
+  CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -26,6 +38,8 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { UserProfileDialog } from '@/components/auth/UserProfileDialog';
+import { SubscriptionStartDialog } from '@/components/auth/SubscriptionStartDialog';
 import { useToast } from '@/hooks/use-toast';
 import { functionUrl } from '@/lib/supabaseEndpoints';
 
@@ -49,8 +63,8 @@ interface Document {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
-  const { user, session } = useAuth();
-  const { resolvedTheme } = useTheme();
+  const { user, session, logout } = useAuth();
+  const { resolvedTheme, setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
@@ -68,6 +82,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
   const [supportMessage, setSupportMessage] = useState('');
   const [supportEmail, setSupportEmail] = useState('');
   const [sendingSupport, setSendingSupport] = useState(false);
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [credits, setCredits] = useState<{ available: number; total: number } | null>(null);
+  const [subStatus, setSubStatus] = useState<string | null>(null);
+  const [showStartSub, setShowStartSub] = useState(false);
   const { toast } = useToast();
 
   // Fetch chat sessions and documents
@@ -117,6 +135,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
     return () => {
       supabase.removeChannel(channel);
     };
+  }, [user?.id]);
+
+  // Load credits and subscription status (simplified for now)
+  useEffect(() => {
+    // TODO: Implement credit and subscription loading when types are available
+    setCredits({ available: 0, total: 0 });
+    setSubStatus('inactive');
   }, [user?.id]);
 
   const navigationItems = [
@@ -503,37 +528,114 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
         )}
       </div>
 
-      {/* User Info */}
-      <div className="p-2 border-t border-sidebar-border">
-        {!collapsed && user && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center space-x-3 p-2 rounded-lg bg-sidebar-accent/50">
-                <Avatar className="h-8 w-8">
-                  {user.avatarUrl ? (
-                    <AvatarImage src={user.avatarUrl} alt="User avatar" />
-                  ) : (
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                      {user.avatar || (user.name.split(' ').map(n => n[0]).join('').toUpperCase())}
-                    </AvatarFallback>
-                  )}
+      {/* Theme Toggle and User Menu */}
+      <div className="p-2 border-t border-sidebar-border space-y-2">
+        {/* Theme Toggle */}
+        <div className="flex justify-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="w-full">
+                {resolvedTheme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme('light')}>
+                <Sun size={16} className="mr-2" />
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('dark')}>
+                <Moon size={16} className="mr-2" />
+                Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('system')}>
+                <Monitor size={16} className="mr-2" />
+                System
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* User Menu */}
+        {user && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="w-full h-8 px-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                    {user.avatar || user.name.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
                 </Avatar>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-sidebar-foreground truncate">
-                    {user.displayName || user.name}
-                  </p>
-                  {/* B2C: omit organization name */}
+                {!collapsed && (
+                  <span className="ml-2 text-sm">{user.name.split(' ')[0]}</span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-64" align="end">
+              <div className="flex items-center justify-start gap-2 p-2">
+                <div className="flex flex-col space-y-1 leading-none">
+                  <p className="font-medium">{user.name}</p>
+                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                  {credits && (
+                    <p className="text-xs text-muted-foreground">Credits: {credits.available}/{credits.total}</p>
+                  )}
                 </div>
               </div>
-            </TooltipTrigger>
-            <TooltipContent side="right" align="start" className="max-w-[220px]">
-              <div className="text-sm font-medium">{user.displayName || user.name}</div>
-              <div className="text-xs text-muted-foreground">{user.title || 'Member'}</div>
-              <div className="text-xs text-muted-foreground">{user.email}</div>
-            </TooltipContent>
-          </Tooltip>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
+                Account
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  if (subStatus !== 'active') {
+                    setShowStartSub(true);
+                    return;
+                  }
+                  // already subscribed: open portal
+                  (async () => {
+                    try {
+                      const token = (await supabase.auth.getSession()).data.session?.access_token;
+                      const res = await fetch(functionUrl('stripe-portal'), { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+                      const json = await res.json();
+                      if (json?.url) window.location.href = json.url;
+                    } catch {}
+                  })();
+                }}
+              >
+                <CreditCard size={16} className="mr-2" />
+                {subStatus === 'active' ? 'Manage/Upgrade plan' : 'Start subscription'}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout}>
+                <LogOut size={16} className="mr-2" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
+
+      {/* User Info (simplified) */}
+      {!collapsed && user && (
+        <div className="p-2 border-t border-sidebar-border">
+          <div className="flex items-center space-x-3 p-2 rounded-lg bg-sidebar-accent/50">
+            <Avatar className="h-8 w-8">
+              {user.avatarUrl ? (
+                <AvatarImage src={user.avatarUrl} alt="User avatar" />
+              ) : (
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                  {user.avatar || (user.name.split(' ').map(n => n[0]).join('').toUpperCase())}
+                </AvatarFallback>
+              )}
+            </Avatar>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-sidebar-foreground truncate">
+                {user.displayName || user.name}
+              </p>
+              {/* B2C: omit organization name */}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Feedback Dialog */}
       <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
@@ -600,6 +702,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* User Profile Dialog */}
+      <UserProfileDialog 
+        open={showProfileDialog} 
+        onOpenChange={setShowProfileDialog} 
+      />
+      <SubscriptionStartDialog open={showStartSub} onOpenChange={setShowStartSub} />
     </div>
   );
 };
