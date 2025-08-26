@@ -46,6 +46,7 @@ import { functionUrl } from '@/lib/supabaseEndpoints';
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  isMobile?: boolean;
 }
 
 interface ChatSession {
@@ -62,7 +63,7 @@ interface Document {
   filename: string;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile = false }) => {
   const { user, session, logout } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -374,7 +375,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
   return (
     <div className={cn(
       "flex flex-col h-full bg-sidebar border-r border-sidebar-border transition-all duration-medium",
-      collapsed ? "w-16" : "w-64"
+      collapsed ? "w-16" : "w-64",
+      isMobile && !collapsed ? "w-80" : "",
+      isMobile ? "shadow-2xl" : ""
     )}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
@@ -420,7 +423,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
         </div>
 
         {/* Chat History */}
-        {!collapsed && chatSessions.length > 0 && (
+        {(isMobile || !collapsed) && chatSessions.length > 0 && (
           <div className="mb-4">
             <ScrollArea className="h-64">
               <div className="space-y-1">
