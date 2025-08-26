@@ -423,14 +423,31 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
 
         {/* Mobile Hamburger Menu Icon - Only show when collapsed on mobile */}
         {isMobile && collapsed && (
-          <div className="fixed top-4 left-4 z-50 md:hidden">
+          <div className="mobile-hamburger md:hidden" style={{ 
+            position: 'fixed',
+            top: '5rem',
+            left: '1rem',
+            zIndex: 9999,
+            pointerEvents: 'auto'
+          }}>
             <Button
               variant="ghost"
               size="sm"
-              onClick={onToggle}
-              className="h-10 w-10 p-0 bg-sidebar border border-sidebar-border shadow-lg"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Hamburger menu clicked!');
+                onToggle();
+              }}
+              className="h-12 w-12 p-0 bg-sidebar border-2 border-sidebar-border shadow-xl hover:bg-sidebar-accent hover:scale-105 transition-all duration-200"
+              type="button"
+              style={{ 
+                minWidth: '48px',
+                minHeight: '48px',
+                touchAction: 'manipulation'
+              }}
             >
-              <Menu size={20} />
+              <Menu size={24} />
             </Button>
           </div>
         )}

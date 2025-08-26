@@ -384,3 +384,21 @@
     margin-right: auto;
   }
 }
+
+/* Ensure mobile hamburger menu is properly positioned and clickable */
+.mobile-hamburger {
+  position: fixed;
+  top: max(6rem, calc(env(safe-area-inset-top) + 4rem));
+  left: max(1rem, env(safe-area-inset-left));
+  z-index: 9999;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+/* Additional mobile fixes */
+@media (max-width: 767px) {
+  .mobile-hamburger {
+    top: max(5rem, calc(env(safe-area-inset-top) + 3rem));
+    left: max(0.5rem, env(safe-area-inset-left));
+  }
+}
