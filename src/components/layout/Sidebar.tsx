@@ -286,8 +286,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
           <div className="flex items-center justify-center">
             <img
               src={resolvedTheme === 'dark' 
-                ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt%20logo%20dark.png"
-                : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt%20logo%20light.png"
+                ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt%20icon%20-%20dark.png"
+                : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt%20icon%20-%20light.png"
               }
               alt="Fineprnt"
               className="h-10 w-auto"

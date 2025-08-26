@@ -1,0 +1,321 @@
+export type ContractType =
+  | 'realestate'|'medical'|'employment'|'financial'|'legal'|'insurance'|'technology'
+  | 'construction'|'manufacturing'|'transportation'|'entertainment'|'education'
+  | 'government'|'nonprofit'|'consulting'|'retail'|'hospitality'|'energy'|'telecom'
+  | 'automotive'|'agriculture'|'pharmaceutical'|'mining'|'aerospace'|'maritime'|'general';
+
+export const CONTRACT_HINTS: Record<ContractType, string[]> = {
+  realestate: ['lease','rent','tenant','landlord','property','deposit','maintenance','utilities','termination'],
+  medical: ['hipaa','phi','billing','authorization','compliance','liability','patient','provider','treatment'],
+  employment: ['employee','compensation','confidentiality','termination','non-compete','benefits','work','employer'],
+  financial: ['interest','payment','collateral','default','amortization','loan','fees','credit'],
+  legal: ['liability','governing','dispute','confidentiality','termination','amendment','assignment','force'],
+  insurance: ['coverage','claim','premium','deductible','policy','exclusion','endorsement','subrogation'],
+  technology: ['license','intellectual','source','api','data','service','maintenance','confidentiality'],
+  construction: ['project','contractor','specifications','change','payment','warranty','safety','completion'],
+  manufacturing: ['quality','delivery','inspection','warranty','supply','production','inventory','compliance'],
+  transportation: ['delivery','freight','carrier','liability','route','equipment','maintenance','safety'],
+  entertainment: ['rights','royalty','distribution','performance','intellectual','territory','duration','compensation'],
+  education: ['curriculum','accreditation','tuition','attendance','evaluation','faculty','facility','compliance'],
+  government: ['compliance','funding','reporting','audit','procurement','performance','termination','amendment'],
+  nonprofit: ['mission','funding','governance','compliance','program','volunteer','donor','transparency'],
+  consulting: ['scope','fees','confidentiality','intellectual','termination','liability','expenses','subcontracting'],
+  retail: ['inventory','pricing','payment','delivery','returns','warranty','marketing','territory'],
+  hospitality: ['service','facility','booking','cancellation','amenities','staff','maintenance','liability'],
+  energy: ['consumption','billing','service','maintenance','compliance','termination','equipment','liability'],
+  telecom: ['service','usage','billing','coverage','equipment','termination','roaming','liability'],
+  automotive: ['warranty','maintenance','financing','insurance','registration','liability','recall','service'],
+  agriculture: ['crop','equipment','land','water','pesticide','harvest','storage','transportation'],
+  pharmaceutical: ['clinical','approval','manufacturing','distribution','patent','liability','compliance','research'],
+  mining: ['extraction','equipment','safety','environmental','royalty','land','transportation','processing'],
+  aerospace: ['aircraft','maintenance','safety','certification','liability','performance','training','support'],
+  maritime: ['vessel','cargo','navigation','safety','insurance','crew','maintenance','liability'],
+  general: ['contract','terms','obligations','rights','liability','payment','termination','confidentiality']
+};
+
+export function detectContractType(filename: string, content: string): ContractType {
+  const lower = (filename + ' ' + content).toLowerCase();
+  for (const [type, hints] of Object.entries(CONTRACT_HINTS) as [ContractType,string[]][]) {
+    if (type === 'general') continue;
+    if (hints.some(h => lower.includes(h))) return type;
+  }
+  return 'general';
+}
+
+// Enhanced query expansion for all contract types
+export const expandQuery = (q: string, contractType: ContractType, debug: boolean = false): string => {
+  const expansions: Record<ContractType, Record<string, string>> = {
+    realestate: {
+      "rent": "rent payment lease terms monthly payment",
+      "deposit": "security deposit damage deposit refundable",
+      "maintenance": "repairs maintenance landlord tenant responsibility",
+      "utilities": "electric water gas internet included excluded",
+      "termination": "lease termination notice period early termination",
+      "property": "property real estate real property premises",
+      "tenant": "tenant lessee renter occupant",
+      "landlord": "landlord lessor property owner",
+    },
+    medical: {
+      "compliance": "hipaa compliance phi protection privacy",
+      "billing": "billing codes reimbursement payment terms",
+      "authorization": "prior authorization pre-approval coverage",
+      "liability": "medical liability malpractice insurance coverage",
+      "patient": "patient client individual person",
+      "provider": "provider physician doctor healthcare",
+      "treatment": "treatment procedure medical care",
+      "insurance": "insurance coverage policy benefits",
+    },
+    employment: {
+      "compensation": "salary benefits bonus commission equity",
+      "termination": "at-will termination notice period severance",
+      "confidentiality": "nda non-disclosure trade secrets",
+      "non-compete": "non-compete clause restrictive covenant",
+      "employee": "employee worker staff personnel",
+      "employer": "employer company organization business",
+      "work": "work duties responsibilities tasks",
+      "benefits": "benefits health insurance retirement",
+    },
+    financial: {
+      "interest": "interest rate apr compound simple",
+      "collateral": "collateral security lien mortgage",
+      "default": "default terms late payment penalties",
+      "amortization": "payment schedule principal interest breakdown",
+      "loan": "loan credit debt borrowing",
+      "payment": "payment installment monthly due",
+      "fees": "fees charges costs expenses",
+      "credit": "credit score rating history",
+    },
+    legal: {
+      "liability": "liability limitations indemnification damages",
+      "governing": "governing law jurisdiction venue",
+      "dispute": "dispute resolution arbitration mediation",
+      "confidentiality": "confidentiality non-disclosure privacy",
+      "termination": "termination breach default",
+      "amendment": "amendment modification change",
+      "assignment": "assignment transfer delegation",
+      "force": "force majeure unforeseeable circumstances",
+    },
+    insurance: {
+      "coverage": "coverage policy limits exclusions",
+      "claim": "claim filing process documentation",
+      "premium": "premium payment cost rate",
+      "deductible": "deductible out-of-pocket responsibility",
+      "policy": "policy terms conditions provisions",
+      "exclusion": "exclusion limitation restriction",
+      "endorsement": "endorsement rider amendment",
+      "subrogation": "subrogation rights recovery",
+    },
+    technology: {
+      "license": "license permission rights usage",
+      "intellectual": "intellectual property ip ownership",
+      "source": "source code software development",
+      "api": "api interface integration access",
+      "data": "data privacy security protection",
+      "service": "service level agreement sla",
+      "maintenance": "maintenance support updates",
+      "confidentiality": "confidentiality trade secrets",
+    },
+    construction: {
+      "project": "project scope timeline deliverables",
+      "contractor": "contractor subcontractor vendor",
+      "specifications": "specifications requirements standards",
+      "change": "change order modification amendment",
+      "payment": "payment schedule milestone billing",
+      "warranty": "warranty guarantee defects",
+      "safety": "safety compliance regulations",
+      "completion": "completion acceptance final",
+    },
+    manufacturing: {
+      "quality": "quality standards specifications requirements",
+      "delivery": "delivery schedule timeline deadline",
+      "inspection": "inspection testing verification",
+      "warranty": "warranty guarantee defects",
+      "supply": "supply chain vendor supplier",
+      "production": "production capacity output volume",
+      "inventory": "inventory stock management",
+      "compliance": "compliance regulations standards",
+    },
+    transportation: {
+      "delivery": "delivery schedule timeline route",
+      "freight": "freight shipping transport cargo",
+      "carrier": "carrier transporter shipper",
+      "liability": "liability insurance coverage",
+      "route": "route destination origin",
+      "equipment": "equipment vehicle machinery",
+      "maintenance": "maintenance service repair",
+      "safety": "safety compliance regulations",
+    },
+    entertainment: {
+      "rights": "rights license permission usage",
+      "royalty": "royalty payment percentage revenue",
+      "distribution": "distribution release publication",
+      "performance": "performance appearance engagement",
+      "intellectual": "intellectual property copyright",
+      "territory": "territory region market",
+      "duration": "duration term period length",
+      "compensation": "compensation payment fee",
+    },
+    education: {
+      "curriculum": "curriculum course content program",
+      "accreditation": "accreditation certification approval",
+      "tuition": "tuition payment cost fees",
+      "attendance": "attendance participation requirement",
+      "evaluation": "evaluation assessment grading",
+      "faculty": "faculty instructor teacher",
+      "facility": "facility classroom equipment",
+      "compliance": "compliance regulations standards",
+    },
+    government: {
+      "compliance": "compliance regulations requirements",
+      "funding": "funding grant budget allocation",
+      "reporting": "reporting documentation submission",
+      "audit": "audit review inspection",
+      "procurement": "procurement bidding selection",
+      "performance": "performance metrics standards",
+      "termination": "termination default breach",
+      "amendment": "amendment modification change",
+    },
+    nonprofit: {
+      "mission": "mission purpose objective goal",
+      "funding": "funding grant donation support",
+      "governance": "governance board leadership",
+      "compliance": "compliance regulations reporting",
+      "program": "program service activity",
+      "volunteer": "volunteer staff personnel",
+      "donor": "donor contributor supporter",
+      "transparency": "transparency disclosure reporting",
+    },
+    consulting: {
+      "scope": "scope work deliverables timeline",
+      "fees": "fees payment compensation rate",
+      "confidentiality": "confidentiality non-disclosure",
+      "intellectual": "intellectual property ownership",
+      "termination": "termination notice period",
+      "liability": "liability limitation indemnification",
+      "expenses": "expenses reimbursement costs",
+      "subcontracting": "subcontracting assignment delegation",
+    },
+    retail: {
+      "inventory": "inventory stock merchandise",
+      "pricing": "pricing cost markup margin",
+      "payment": "payment terms methods",
+      "delivery": "delivery shipping fulfillment",
+      "returns": "returns refund exchange",
+      "warranty": "warranty guarantee protection",
+      "marketing": "marketing advertising promotion",
+      "territory": "territory region market",
+    },
+    hospitality: {
+      "service": "service quality standards",
+      "facility": "facility property premises",
+      "booking": "booking reservation confirmation",
+      "cancellation": "cancellation policy refund",
+      "amenities": "amenities features services",
+      "staff": "staff personnel employees",
+      "maintenance": "maintenance upkeep repair",
+      "liability": "liability insurance coverage",
+    },
+    energy: {
+      "consumption": "consumption usage measurement",
+      "billing": "billing payment rate",
+      "service": "service reliability availability",
+      "maintenance": "maintenance repair service",
+      "compliance": "compliance regulations safety",
+      "termination": "termination disconnection",
+      "equipment": "equipment meter installation",
+      "liability": "liability damage responsibility",
+    },
+    telecom: {
+      "service": "service plan package",
+      "usage": "usage data minutes text",
+      "billing": "billing payment charges",
+      "coverage": "coverage area network",
+      "equipment": "equipment device phone",
+      "termination": "termination cancellation",
+      "roaming": "roaming international charges",
+      "liability": "liability damage loss",
+    },
+    automotive: {
+      "warranty": "warranty coverage protection",
+      "maintenance": "maintenance service repair",
+      "financing": "financing payment terms",
+      "insurance": "insurance coverage policy",
+      "registration": "registration title ownership",
+      "liability": "liability damage responsibility",
+      "recall": "recall notice safety",
+      "service": "service schedule maintenance",
+    },
+    agriculture: {
+      "crop": "crop yield production",
+      "equipment": "equipment machinery tools",
+      "land": "land property acreage",
+      "water": "water irrigation rights",
+      "pesticide": "pesticide chemical use",
+      "harvest": "harvest timing delivery",
+      "storage": "storage facility warehouse",
+      "transportation": "transportation shipping delivery",
+    },
+    pharmaceutical: {
+      "clinical": "clinical trial research",
+      "approval": "approval regulatory compliance",
+      "manufacturing": "manufacturing production quality",
+      "distribution": "distribution supply chain",
+      "patent": "patent intellectual property",
+      "liability": "liability safety adverse",
+      "compliance": "compliance regulations fda",
+      "research": "research development testing",
+    },
+    mining: {
+      "extraction": "extraction production output",
+      "equipment": "equipment machinery tools",
+      "safety": "safety compliance regulations",
+      "environmental": "environmental impact protection",
+      "royalty": "royalty payment percentage",
+      "land": "land property mineral rights",
+      "transportation": "transportation shipping delivery",
+      "processing": "processing refining treatment",
+    },
+    aerospace: {
+      "aircraft": "aircraft vehicle equipment",
+      "maintenance": "maintenance service repair",
+      "safety": "safety compliance regulations",
+      "certification": "certification approval compliance",
+      "liability": "liability insurance coverage",
+      "performance": "performance specifications standards",
+      "training": "training certification qualification",
+      "support": "support service maintenance",
+    },
+    maritime: {
+      "vessel": "vessel ship boat",
+      "cargo": "cargo freight shipment",
+      "navigation": "navigation route course",
+      "safety": "safety compliance regulations",
+      "insurance": "insurance coverage policy",
+      "crew": "crew personnel staff",
+      "maintenance": "maintenance service repair",
+      "liability": "liability damage responsibility",
+    },
+    general: {
+      "key terms": "key terms important clauses main provisions",
+      "payment terms": "payment terms payment conditions billing terms",
+      "termination": "termination clauses end contract cancellation",
+      "liability": "liability limitations indemnification damages",
+      "confidentiality": "confidentiality non-disclosure privacy",
+      "governing law": "governing law jurisdiction venue",
+      "amendment": "amendment modification change",
+      "assignment": "assignment transfer delegation",
+    }
+  };
+  
+  const contractExpansions = expansions[contractType] || expansions.general;
+  const lower = q.toLowerCase();
+  
+  for (const [key, expansion] of Object.entries(contractExpansions)) {
+    if (lower.includes(key)) {
+      if (debug) console.log(`Query expansion applied for ${contractType}: "${key}"`);
+      return `${q} ${expansion}`;
+    }
+  }
+  
+  return q;
+};
