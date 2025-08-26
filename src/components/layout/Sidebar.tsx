@@ -137,11 +137,82 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
     };
   }, [user?.id]);
 
-  // Load credits and subscription status (simplified for now)
+  // Load credits and subscription status
   useEffect(() => {
-    // TODO: Implement credit and subscription loading when types are available
-    setCredits({ available: 0, total: 0 });
-    setSubStatus('inactive');
+    const loadCredits = async () => {
+      if (!user?.id) return;
+      
+      try {
+        // Use raw SQL for now until types are updated
+        const { data: credit } = await (supabase as any).rpc('get_credit_summary', { p_user_id: user.id });
+        if (credit && Array.isArray(credit) && credit.length > 0) {
+          const row = credit[0];
+          const start = Number(row.starting_credits ?? 0);
+          const over = Number(row.overage_units ?? 0);
+          const used = Number(row.credits_used ?? 0);
+          setCredits({
+            available: Math.max(0, start + over - used),
+            total: start + over,
+          });
+        }
+      } catch (err) {
+        console.warn('get_credit_summary not available yet');
+        setCredits({ available: 0, total: 0 });
+      }
+    };
+
+    const loadSub = async () => {
+      if (!user?.id) return;
+      
+      try {
+        // Use raw SQL for subscription data
+        const { data: subData } = await (supabase as any).rpc('get_user_subscription', { p_user_id: user.id });
+        if (subData && Array.isArray(subData) && subData.length > 0) {
+          const row = subData[0];
+          setSubStatus(row.status ?? 'inactive');
+        } else {
+          setSubStatus('inactive');
+        }
+      } catch (err) {
+        console.warn('get_user_subscription not available yet');
+        setSubStatus('inactive');
+      }
+    };
+
+    loadCredits();
+    loadSub();
+
+    // Realtime: refresh credits when consumption events occur or credits table changes
+    const channel = supabase
+      .channel('credits-realtime')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'document_usage_log',
+        filter: `user_id=eq.${user?.id || ''}`
+      }, () => { loadCredits(); })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'document_credits',
+        filter: `user_id=eq.${user?.id || ''}`
+      }, () => { loadCredits(); })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'documents',
+        filter: `user_id=eq.${user?.id || ''}`
+      }, (payload) => {
+        const newStatus = (payload as any)?.new?.status;
+        if (newStatus === 'completed') {
+          loadCredits();
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
 
   const navigationItems = [
@@ -534,7 +605,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
         <div className="flex justify-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="w-full">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                 {resolvedTheme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
               </Button>
             </DropdownMenuTrigger>
@@ -559,14 +630,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full h-8 px-2">
-                <Avatar className="h-6 w-6">
+              <Button variant="ghost" size="sm" className="h-8 px-2">
+                <Avatar className="h-5 w-5">
                   <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                     {user.avatar || user.name.split(' ').map(n => n[0]).join('')}
                   </AvatarFallback>
                 </Avatar>
                 {!collapsed && (
-                  <span className="ml-2 text-sm">{user.name.split(' ')[0]}</span>
+                  <span className="ml-2 text-xs">{user.name.split(' ')[0]}</span>
                 )}
               </Button>
             </DropdownMenuTrigger>
@@ -614,28 +685,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
         )}
       </div>
 
-      {/* User Info (simplified) */}
-      {!collapsed && user && (
-        <div className="p-2 border-t border-sidebar-border">
-          <div className="flex items-center space-x-3 p-2 rounded-lg bg-sidebar-accent/50">
-            <Avatar className="h-8 w-8">
-              {user.avatarUrl ? (
-                <AvatarImage src={user.avatarUrl} alt="User avatar" />
-              ) : (
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                  {user.avatar || (user.name.split(' ').map(n => n[0]).join('').toUpperCase())}
-                </AvatarFallback>
-              )}
-            </Avatar>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">
-                {user.displayName || user.name}
-              </p>
-              {/* B2C: omit organization name */}
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Feedback Dialog */}
       <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
