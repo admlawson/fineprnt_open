@@ -20,7 +20,7 @@ import {
   Shield, 
   PanelLeftClose, 
   PanelLeftOpen,
-  Plus,
+  PenSquare,
   Search,
   Trash2,
   Edit2,
@@ -405,6 +405,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
         </Button>
       </div>
 
+      {/* Mobile Hamburger Menu Icon - Only show when collapsed on mobile */}
+      {isMobile && collapsed && (
+        <div className="flex items-center justify-center p-4 border-b border-sidebar-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="text-sidebar-foreground hover:bg-sidebar-accent"
+          >
+            <PanelLeftOpen size={20} />
+          </Button>
+        </div>
+      )}
+
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto p-2">
         {/* New Chat Button */}
@@ -417,7 +431,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
             )}
             onClick={createNewChat}
           >
-            <Plus size={16} className={collapsed ? "" : "mr-3"} />
+            <PenSquare size={16} className={collapsed ? "" : "mr-3"} />
             {!collapsed && "New Chat"}
           </Button>
         </div>
