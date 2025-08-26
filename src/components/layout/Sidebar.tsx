@@ -18,8 +18,7 @@ import {
   FileText, 
   Settings, 
   Shield, 
-  PanelLeftClose, 
-  PanelLeftOpen,
+  Menu,
   PenSquare,
   Search,
   Trash2,
@@ -373,336 +372,357 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
   const isOnChatPage = location.pathname === '/app/chat';
 
   return (
-    <div className={cn(
-      "flex flex-col h-full bg-sidebar border-r border-sidebar-border transition-all duration-medium",
-      collapsed ? "w-16" : "w-64",
-      isMobile && !collapsed ? "w-80" : "",
-      isMobile ? "shadow-2xl" : ""
-    )}>
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-        {!collapsed && (
-          <div className="flex items-center justify-center">
-            <img
-              src={resolvedTheme === 'dark' 
-                ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt%20icon%20-%20dark.png"
-                : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt%20icon%20-%20light.png"
-              }
-              alt="Fineprnt"
-              className="h-10 w-auto"
-              loading="eager"
-              decoding="async"
-            />
-          </div>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
+    <>
+      {/* Mobile Overlay - Only show when sidebar is open on mobile */}
+      {isMobile && !collapsed && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
           onClick={onToggle}
-          className="text-sidebar-foreground hover:bg-sidebar-accent"
-        >
-          {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
-        </Button>
-      </div>
-
-      {/* Mobile Hamburger Menu Icon - Only show when collapsed on mobile */}
-      {isMobile && collapsed && (
-        <div className="flex items-center justify-center p-4 border-b border-sidebar-border">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggle}
-            className="text-sidebar-foreground hover:bg-sidebar-accent"
-          >
-            <PanelLeftOpen size={20} />
-          </Button>
-        </div>
+        />
       )}
 
-      {/* Navigation */}
-      <div className="flex-1 overflow-y-auto p-2">
-        {/* New Chat Button */}
-        <div className="mb-4">
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground border border-sidebar-border bg-sidebar-accent/50",
-              collapsed ? "px-2" : "px-3"
-            )}
-            onClick={createNewChat}
-          >
-            <PenSquare size={16} className={collapsed ? "" : "mr-3"} />
-            {!collapsed && "New Chat"}
-          </Button>
+      {/* Sidebar */}
+      <div className={cn(
+        "flex flex-col h-full bg-sidebar border-r border-sidebar-border transition-all duration-300",
+        // Desktop behavior
+        !isMobile && (collapsed ? "w-16" : "w-64"),
+        // Mobile behavior - always full width when open, hidden when closed
+        isMobile && (collapsed ? "w-0 -translate-x-full" : "w-80"),
+        // Mobile positioning
+        isMobile && "fixed left-0 top-0 z-50 h-full shadow-2xl"
+      )}>
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
+          {!collapsed && (
+            <div className="flex items-center justify-center">
+              <img
+                src={resolvedTheme === 'dark' 
+                  ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt%20icon%20-%20dark.png"
+                  : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt%20icon%20-%20light.png"
+                }
+                alt="Fineprnt"
+                className="h-10 w-auto"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+          )}
+          
+          {/* Single toggle button - only show when not collapsed on mobile */}
+          {(!collapsed || !isMobile) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggle}
+              className="text-sidebar-foreground hover:bg-sidebar-accent"
+            >
+              {isMobile ? <X size={16} /> : (collapsed ? <Menu size={16} /> : <Menu size={16} />)}
+            </Button>
+          )}
         </div>
 
-        {/* Chat History */}
-        {(isMobile || !collapsed) && chatSessions.length > 0 && (
-          <div className="mb-4">
-            <ScrollArea className="h-64">
-              <div className="space-y-1">
-                {displayedSessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className={cn(
-                      "group relative rounded-lg p-2 cursor-pointer hover:bg-sidebar-accent transition-colors",
-                      isOnChatPage && "bg-sidebar-accent/50"
-                    )}
-                    onClick={() => navigateToSession(session.id)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        {editingSession === session.id ? (
-                          <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
-                            <Input
-                              value={editingTitle}
-                              onChange={(e) => setEditingTitle(e.target.value)}
-                              className="h-6 text-sm"
-                              autoFocus
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  saveSessionTitle(session.id);
-                                } else if (e.key === 'Escape') {
-                                  cancelEditingSession();
-                                }
-                              }}
-                            />
-                            <div className="flex gap-1">
+        {/* Mobile Hamburger Menu Icon - Only show when collapsed on mobile */}
+        {isMobile && collapsed && (
+          <div className="fixed top-4 left-4 z-50 md:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggle}
+              className="h-10 w-10 p-0 bg-sidebar border border-sidebar-border shadow-lg"
+            >
+              <Menu size={20} />
+            </Button>
+          </div>
+        )}
+
+        {/* Navigation Content - Only render when not collapsed on mobile */}
+        {(!isMobile || !collapsed) && (
+          <>
+            {/* Navigation */}
+            <div className="flex-1 overflow-y-auto p-2">
+              {/* New Chat Button */}
+              <div className="mb-4">
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground border border-sidebar-border bg-sidebar-accent/50",
+                    collapsed ? "px-2" : "px-3"
+                  )}
+                  onClick={createNewChat}
+                >
+                  <PenSquare size={16} className={collapsed ? "" : "mr-3"} />
+                  {!collapsed && "New Chat"}
+                </Button>
+              </div>
+
+              {/* Chat History */}
+              {(isMobile || !collapsed) && chatSessions.length > 0 && (
+                <div className="mb-4">
+                  <ScrollArea className="h-64">
+                    <div className="space-y-1">
+                      {displayedSessions.map((session) => (
+                        <div
+                          key={session.id}
+                          className={cn(
+                            "group relative rounded-lg p-2 cursor-pointer hover:bg-sidebar-accent transition-colors",
+                            isOnChatPage && "bg-sidebar-accent/50"
+                          )}
+                          onClick={() => navigateToSession(session.id)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              {editingSession === session.id ? (
+                                <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+                                  <Input
+                                    value={editingTitle}
+                                    onChange={(e) => setEditingTitle(e.target.value)}
+                                    className="h-6 text-sm"
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        saveSessionTitle(session.id);
+                                      } else if (e.key === 'Escape') {
+                                        cancelEditingSession();
+                                      }
+                                    }}
+                                  />
+                                  <div className="flex gap-1">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-5 w-5 p-0 text-green-600 hover:text-green-700"
+                                      onClick={() => saveSessionTitle(session.id)}
+                                    >
+                                      <Check size={10} />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-5 w-5 p-0 text-red-600 hover:text-red-700"
+                                      onClick={cancelEditingSession}
+                                    >
+                                      <X size={10} />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <p className="text-sm font-medium text-sidebar-foreground truncate">
+                                    {session.title}
+                                  </p>
+                                  <p className="text-xs text-sidebar-foreground/60 truncate">
+                                    {getDocumentName(session.document_id)}
+                                  </p>
+                                  <p className="text-xs text-sidebar-foreground/40">
+                                    {new Date(session.updated_at).toLocaleDateString()}
+                                  </p>
+                                </>
+                              )}
+                            </div>
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="h-5 w-5 p-0 text-green-600 hover:text-green-700"
-                                onClick={() => saveSessionTitle(session.id)}
+                                className="h-6 w-6 p-0 text-sidebar-foreground/60 hover:text-sidebar-foreground"
+                                onClick={(e) => startEditingSession(session.id, session.title, e)}
                               >
-                                <Check size={10} />
+                                <Edit2 size={12} />
                               </Button>
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="h-5 w-5 p-0 text-red-600 hover:text-red-700"
-                                onClick={cancelEditingSession}
+                                className="h-6 w-6 p-0 text-sidebar-foreground/60 hover:text-destructive"
+                                onClick={(e) => deleteSession(session.id, e)}
                               >
-                                <X size={10} />
+                                <Trash2 size={12} />
                               </Button>
                             </div>
                           </div>
-                        ) : (
-                          <>
-                            <p className="text-sm font-medium text-sidebar-foreground truncate">
-                              {session.title}
-                            </p>
-                            <p className="text-xs text-sidebar-foreground/60 truncate">
-                              {getDocumentName(session.document_id)}
-                            </p>
-                            <p className="text-xs text-sidebar-foreground/40">
-                              {new Date(session.updated_at).toLocaleDateString()}
-                            </p>
-                          </>
-                        )}
-                      </div>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        </div>
+                      ))}
+                      {chatSessions.length > 5 && (
                         <Button
-                          size="sm"
                           variant="ghost"
-                          className="h-6 w-6 p-0 text-sidebar-foreground/60 hover:text-sidebar-foreground"
-                          onClick={(e) => startEditingSession(session.id, session.title, e)}
-                        >
-                          <Edit2 size={12} />
-                        </Button>
-                        <Button
                           size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0 text-sidebar-foreground/60 hover:text-destructive"
-                          onClick={(e) => deleteSession(session.id, e)}
+                          className="w-full text-xs text-sidebar-foreground/60 hover:text-sidebar-foreground"
+                          onClick={() => setShowAllSessions(!showAllSessions)}
                         >
-                          <Trash2 size={12} />
+                          {showAllSessions ? 'Show Less' : `Show ${chatSessions.length - 5} More`}
                         </Button>
-                      </div>
+                      )}
                     </div>
-                  </div>
-                ))}
-                {chatSessions.length > 5 && (
+                  </ScrollArea>
+                  <div className="border-t border-sidebar-border my-4" />
+                </div>
+              )}
+
+              {/* Other Navigation */}
+              <nav className="space-y-1">
+                {navigationItems.map((item) => (
                   <Button
+                    key={item.href}
                     variant="ghost"
-                    size="sm"
-                    className="w-full text-xs text-sidebar-foreground/60 hover:text-sidebar-foreground"
-                    onClick={() => setShowAllSessions(!showAllSessions)}
+                    className={cn(
+                      "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      collapsed ? "px-2" : "px-3"
+                    )}
+                    onClick={() => handleNavigation(item.href)}
                   >
-                    {showAllSessions ? 'Show Less' : `Show ${chatSessions.length - 5} More`}
+                    <item.icon size={16} className={collapsed ? "" : "mr-3"} />
+                    {!collapsed && item.label}
                   </Button>
-                )}
-              </div>
-            </ScrollArea>
-            <div className="border-t border-sidebar-border my-4" />
-          </div>
-        )}
+                ))}
 
-        {/* Other Navigation */}
-        <nav className="space-y-1">
-          {navigationItems.map((item) => (
-            <Button
-              key={item.href}
-              variant="ghost"
-              className={cn(
-                "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                collapsed ? "px-2" : "px-3"
-              )}
-              onClick={() => handleNavigation(item.href)}
-            >
-              <item.icon size={16} className={collapsed ? "" : "mr-3"} />
-              {!collapsed && item.label}
-            </Button>
-          ))}
-
-          {/* Feedback button */}
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              collapsed ? "px-2" : "px-3"
-            )}
-            onClick={() => {
-              setFeedbackEmail(user?.email || '');
-              setFeedbackOpen(true);
-            }}
-          >
-            <MessageSquare size={16} className={collapsed ? '' : 'mr-3'} />
-            {!collapsed && 'Send feedback'}
-          </Button>
-
-          {/* Support button */}
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              collapsed ? "px-2" : "px-3"
-            )}
-            onClick={() => {
-              setSupportEmail(user?.email || '');
-              setSupportOpen(true);
-            }}
-          >
-            <Shield size={16} className={collapsed ? '' : 'mr-3'} />
-            {!collapsed && 'Get Help'}
-          </Button>
-        </nav>
-
-        {/* Admin Section */}
-        {adminItems.length > 0 && (
-          <>
-            <div className="border-t border-sidebar-border my-4" />
-            <nav className="space-y-1">
-              {!collapsed && (
-                <p className="px-3 text-xs font-medium text-sidebar-foreground/60 uppercase tracking-wider">
-                  Administration
-                </p>
-              )}
-              {adminItems.map((item) => (
+                {/* Feedback button */}
                 <Button
-                  key={item.href}
                   variant="ghost"
                   className={cn(
                     "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                     collapsed ? "px-2" : "px-3"
                   )}
-                  onClick={() => handleNavigation(item.href)}
+                  onClick={() => {
+                    setFeedbackEmail(user?.email || '');
+                    setFeedbackOpen(true);
+                  }}
                 >
-                  <item.icon size={16} className={collapsed ? "" : "mr-3"} />
-                  {!collapsed && item.label}
+                  <MessageSquare size={16} className={collapsed ? '' : 'mr-3'} />
+                  {!collapsed && 'Send feedback'}
                 </Button>
-              ))}
-            </nav>
+
+                {/* Support button */}
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    collapsed ? "px-2" : "px-3"
+                  )}
+                  onClick={() => {
+                    setSupportEmail(user?.email || '');
+                    setSupportOpen(true);
+                  }}
+                >
+                  <Shield size={16} className={collapsed ? '' : 'mr-3'} />
+                  {!collapsed && 'Get Help'}
+                </Button>
+              </nav>
+
+              {/* Admin Section */}
+              {adminItems.length > 0 && (
+                <>
+                  <div className="border-t border-sidebar-border my-4" />
+                  <nav className="space-y-1">
+                    {!collapsed && (
+                      <p className="px-3 text-xs font-medium text-sidebar-foreground/60 uppercase tracking-wider">
+                        Administration
+                      </p>
+                    )}
+                    {adminItems.map((item) => (
+                      <Button
+                        key={item.href}
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                          collapsed ? "px-2" : "px-3"
+                        )}
+                        onClick={() => handleNavigation(item.href)}
+                      >
+                        <item.icon size={16} className={collapsed ? "" : "mr-3"} />
+                        {!collapsed && item.label}
+                      </Button>
+                    ))}
+                  </nav>
+                </>
+              )}
+            </div>
+
+            {/* Theme Toggle and User Menu */}
+            <div className="p-2 border-t border-sidebar-border space-y-2">
+              {/* Theme Toggle */}
+              <div className="flex justify-center">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      {resolvedTheme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setTheme('light')}>
+                      <Sun size={16} className="mr-2" />
+                      Light
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme('dark')}>
+                      <Moon size={16} className="mr-2" />
+                      Dark
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme('system')}>
+                      <Monitor size={16} className="mr-2" />
+                      System
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* User Menu */}
+              {user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 px-2">
+                      <Avatar className="h-5 w-5">
+                        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                          {user.avatar || user.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      {!collapsed && (
+                        <span className="ml-2 text-xs">{user.name.split(' ')[0]}</span>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-64" align="end">
+                    <div className="flex items-center justify-start gap-2 p-2">
+                      <div className="flex flex-col space-y-1 leading-none">
+                        <p className="font-medium">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                        {credits && (
+                          <p className="text-xs text-muted-foreground">Credits: {credits.available}/{credits.total}</p>
+                        )}
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
+                      Account
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        if (subStatus !== 'active') {
+                          setShowStartSub(true);
+                          return;
+                        }
+                        // already subscribed: open portal
+                        (async () => {
+                          try {
+                            const token = (await supabase.auth.getSession()).data.session?.access_token;
+                            const res = await fetch(functionUrl('stripe-portal'), { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+                            const json = await res.json();
+                            if (json?.url) window.location.href = json.url;
+                          } catch {}
+                        })();
+                      }}
+                    >
+                      <CreditCard size={16} className="mr-2" />
+                      {subStatus === 'active' ? 'Manage/Upgrade plan' : 'Start subscription'}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={logout}>
+                      <LogOut size={16} className="mr-2" />
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </>
         )}
       </div>
-
-      {/* Theme Toggle and User Menu */}
-      <div className="p-2 border-t border-sidebar-border space-y-2">
-        {/* Theme Toggle */}
-        <div className="flex justify-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                {resolvedTheme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setTheme('light')}>
-                <Sun size={16} className="mr-2" />
-                Light
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme('dark')}>
-                <Moon size={16} className="mr-2" />
-                Dark
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme('system')}>
-                <Monitor size={16} className="mr-2" />
-                System
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* User Menu */}
-        {user && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 px-2">
-                <Avatar className="h-5 w-5">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                    {user.avatar || user.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-                {!collapsed && (
-                  <span className="ml-2 text-xs">{user.name.split(' ')[0]}</span>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64" align="end">
-              <div className="flex items-center justify-start gap-2 p-2">
-                <div className="flex flex-col space-y-1 leading-none">
-                  <p className="font-medium">{user.name}</p>
-                  <p className="text-xs text-muted-foreground">{user.email}</p>
-                  {credits && (
-                    <p className="text-xs text-muted-foreground">Credits: {credits.available}/{credits.total}</p>
-                  )}
-                </div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  if (subStatus !== 'active') {
-                    setShowStartSub(true);
-                    return;
-                  }
-                  // already subscribed: open portal
-                  (async () => {
-                    try {
-                      const token = (await supabase.auth.getSession()).data.session?.access_token;
-                      const res = await fetch(functionUrl('stripe-portal'), { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-                      const json = await res.json();
-                      if (json?.url) window.location.href = json.url;
-                    } catch {}
-                  })();
-                }}
-              >
-                <CreditCard size={16} className="mr-2" />
-                {subStatus === 'active' ? 'Manage/Upgrade plan' : 'Start subscription'}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logout}>
-                <LogOut size={16} className="mr-2" />
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </div>
-
-
 
       {/* Feedback Dialog */}
       <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
@@ -723,7 +743,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
             </div>
             <div className="space-y-1">
               <Label htmlFor="fb-msg">Your feedback</Label>
-              <Textarea id="fb-msg" placeholder="What’s working well? What could be better?" value={feedbackMessage} onChange={(e)=>setFeedbackMessage(e.target.value)} rows={5} />
+              <Textarea id="fb-msg" placeholder="What's working well? What could be better?" value={feedbackMessage} onChange={(e)=>setFeedbackMessage(e.target.value)} rows={5} />
             </div>
             <div className="space-y-1">
               <Label htmlFor="fb-email">Contact (optional)</Label>
@@ -776,6 +796,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
         onOpenChange={setShowProfileDialog} 
       />
       <SubscriptionStartDialog open={showStartSub} onOpenChange={setShowStartSub} />
-    </div>
+    </>
   );
 };
