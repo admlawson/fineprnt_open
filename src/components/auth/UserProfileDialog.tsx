@@ -378,25 +378,25 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] sm:max-w-lg md:max-w-xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User size={20} />
+      <DialogContent className="max-w-[95vw] sm:max-w-lg md:max-w-xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto p-4 sm:p-6">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <User size={18} className="sm:w-5 sm:h-5" />
             User Profile
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm">
             Manage your profile information and preferences.
           </DialogDescription>
         </DialogHeader>
 
         {/* Subscription & Credits */}
-        <div className="p-3 rounded-lg bg-muted/50 mb-4 text-sm">
+        <div className="p-3 sm:p-4 rounded-lg bg-muted/50 mb-4 text-sm">
           {(creditSummary || subscription) ? (
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2 sm:gap-3">
               {subscription && (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <span className="font-medium capitalize">{subscription.plan_key || 'no plan'}</span>
-                  <span className="text-xs rounded px-2 py-0.5 bg-secondary text-secondary-foreground capitalize">{subscription.status || 'inactive'}</span>
+                  <span className="text-xs rounded px-2 py-1 bg-secondary text-secondary-foreground capitalize w-fit">{subscription.status || 'inactive'}</span>
                   {subscription.period_end && (
                     <span className="text-muted-foreground text-xs">renews {new Date(subscription.period_end).toLocaleDateString()}</span>
                   )}
@@ -404,20 +404,20 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
               )}
               {creditSummary && (creditSummary.starting_credits + creditSummary.overage_units > 0 || creditSummary.credits_available >= 0) && (
                 <>
-                  <div>
+                  <div className="text-sm">
                     Credits available: <span className="font-medium">{Number(creditSummary.credits_available ?? 0)}</span> / {Number(creditSummary.starting_credits ?? 0) + Number(creditSummary.overage_units ?? 0)}
                   </div>
                   {(creditSummary.period_start || creditSummary.period_end) && (
-                    <div className="text-muted-foreground">
+                    <div className="text-muted-foreground text-xs">
                       Period: {creditSummary.period_start ? new Date(creditSummary.period_start).toLocaleDateString() : '—'} → {creditSummary.period_end ? new Date(creditSummary.period_end).toLocaleDateString() : '—'}
                     </div>
                   )}
                 </>
               )}
-              <div className="flex gap-2 mt-2">
-                <Button size="sm" variant="outline" onClick={openStripePortal}>Manage Billing</Button>
+              <div className="flex flex-col gap-2 mt-3">
+                <Button size="sm" variant="outline" onClick={openStripePortal} className="w-full h-11 text-sm">Manage Billing</Button>
                 {subscription?.plan_key && (
-                  <Button size="sm" variant="outline" onClick={openStripePortal}>Manage Subscription</Button>
+                  <Button size="sm" variant="outline" onClick={openStripePortal} className="w-full h-11 text-sm">Manage Subscription</Button>
                 )}
                 <Button size="sm" onClick={async () => {
                   try {
@@ -432,7 +432,7 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
                   } catch (err: any) {
                     toast({ title: 'Checkout error', description: err?.message || 'Unable to buy credit', variant: 'destructive' });
                   }
-                }}>Buy one document ($12)</Button>
+                }} className="w-full h-11 text-sm">Buy one document ($12)</Button>
                 {subscription?.plan_key !== 'pro' && (
                 <Button size="sm" variant="secondary" onClick={async () => {
                   try {
@@ -447,7 +447,7 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
                   } catch (err: any) {
                     toast({ title: 'Subscription error', description: err?.message || 'Unable to start subscription', variant: 'destructive' });
                   }
-                }}>{subscription?.plan_key ? 'Upgrade to Pro' : 'Subscribe'}</Button>
+                }} className="w-full h-11 text-sm">{subscription?.plan_key ? 'Upgrade to Pro' : 'Subscribe'}</Button>
                 )}
               </div>
             </div>
@@ -463,15 +463,15 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
             <Loader2 className="h-4 w-4 animate-spin" /> Loading profile...
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Avatar */}
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-3 sm:gap-4">
               <div className="relative">
-                <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
+                <Avatar className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24">
                   {avatarUrl ? (
                     <AvatarImage src={avatarUrl} alt="User avatar image" />
                   ) : (
-                    <AvatarFallback className="bg-primary text-primary-foreground text-lg" aria-label="User initials avatar">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-base sm:text-lg" aria-label="User initials avatar">
                       {userInitials}
                     </AvatarFallback>
                   )}
@@ -481,7 +481,7 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
               <div
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={onDrop}
-                className="w-full rounded-lg border border-dashed p-3 sm:p-4 text-center text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
+                className="w-full rounded-lg border border-dashed p-3 sm:p-4 text-center text-xs sm:text-sm cursor-pointer hover:bg-muted/50 transition-colors min-h-[60px] flex items-center justify-center"
                 onClick={() => fileInputRef.current?.click()}
                 aria-label="Upload profile photo via click or drag and drop"
               >
@@ -501,7 +501,8 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
                   ) : (
                     <>
                       <ImagePlus className="h-4 w-4" />
-                      <span>Tap to select or drag an image (max 2MB)</span>
+                      <span className="hidden sm:inline">Tap to select or drag an image (max 2MB)</span>
+                      <span className="sm:hidden">Tap to select image (max 2MB)</span>
                     </>
                   )}
                 </div>
@@ -515,13 +516,14 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
 
             {/* Display Name */}
             <div className="space-y-2">
-              <Label htmlFor="displayName">Display Name</Label>
+              <Label htmlFor="displayName" className="text-sm font-medium">Display Name</Label>
               <Input
                 id="displayName"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Enter your display name"
                 aria-invalid={!validateDisplayName(displayName)}
+                className="h-10 sm:h-11"
               />
               {!validateDisplayName(displayName) && (
                 <p className="text-xs text-destructive">Must be at least 2 characters.</p>
@@ -530,14 +532,14 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
 
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="email"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-10 sm:h-11"
                   placeholder="Enter your email"
                 />
               </div>
@@ -545,24 +547,24 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
                 Changing your email will require confirmation via email.
               </p>
               {newEmail !== initialSnapshot.current.email && (
-                <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Current Password</Label>
+                <div className="space-y-2 mt-3">
+                  <Label htmlFor="currentPassword" className="text-sm font-medium">Current Password</Label>
                   <Input
                     id="currentPassword"
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="Enter your current password"
+                    className="h-10 sm:h-11"
                   />
-
                 </div>
               )}
             </div>
 
             {/* Title and Phone */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="title" className="flex items-center gap-2">
+                <Label htmlFor="title" className="flex items-center gap-2 text-sm font-medium">
                   <Briefcase size={14} /> Job Title
                 </Label>
                 <Input
@@ -570,10 +572,11 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g., Compliance Officer"
+                  className="h-10 sm:h-11"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone" className="flex items-center gap-2">
+                <Label htmlFor="phone" className="flex items-center gap-2 text-sm font-medium">
                   <Phone size={14} /> Phone Number
                 </Label>
                 <Input
@@ -581,42 +584,51 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="e.g., +1 555 123 4567"
+                  className="h-10 sm:h-11"
                 />
               </div>
             </div>
 
             {/* Bio */}
             <div className="space-y-2">
-              <Label htmlFor="bio">Bio / Description</Label>
+              <Label htmlFor="bio" className="text-sm font-medium">Bio / Description</Label>
               <Textarea
                 id="bio"
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Tell us a bit about your role..."
+                className="min-h-[80px] sm:min-h-[100px] resize-none"
               />
             </div>
 
             {/* Role (Read-only) */}
             <div className="space-y-2">
-              <Label>Role</Label>
+              <Label className="text-sm font-medium">Role</Label>
               <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-sm text-muted-foreground capitalize">{user.role}</p>
               </div>
             </div>
 
-            <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
+            <DialogFooter className="flex-col-reverse gap-3 pt-4 border-t">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={loading || uploading}
-                className="w-full sm:w-auto"
+                className="w-full h-11"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading || uploading || !validateDisplayName(displayName)} className="w-full sm:w-auto">
+              <Button 
+                type="submit" 
+                disabled={loading || uploading || !validateDisplayName(displayName)} 
+                className="w-full h-11"
+              >
                 {loading ? (
-                  <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Saving...</span>
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" /> 
+                    Saving...
+                  </span>
                 ) : (
                   'Save Changes'
                 )}
