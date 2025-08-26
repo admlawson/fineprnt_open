@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /app/
+
+# Point crawlers to sitemap (will be absolute after domain is confirmed)
+Sitemap: /sitemap.xml
