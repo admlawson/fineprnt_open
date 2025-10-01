@@ -213,9 +213,14 @@ export const Landing: React.FC = () => {
                     Coming Soon
                   </div>
                 </div>
-                <Button variant="ghost" className="w-full sm:w-auto" onClick={() => window.open('https://github.com/admlawson/fineprnt_open','_blank')}>
-                  View on GitHub
-                </Button>
+                <div className="relative">
+                  <Button variant="ghost" className="w-full sm:w-auto" onClick={() => window.open('https://github.com/admlawson/fineprnt_open','_blank')}>
+                    View on GitHub
+                  </Button>
+                  <div className="absolute -top-2 -right-2 rounded-full bg-primary text-primary-foreground text-xs px-2 py-0.5 shadow-sm">
+                    Open Source
+                  </div>
+                </div>
               </div>
 
               {/* Compact trust bar */}
