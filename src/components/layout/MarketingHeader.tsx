@@ -53,7 +53,6 @@ const MarketingHeader: React.FC = () => {
           )}>
             <button className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => handleNav('how-it-works')}>Product</button>
             <button className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => handleNav('features')}>Features</button>
-            <button className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => handleNav('pricing')}>Pricing</button>
             <button className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => handleNav('faq')}>FAQ</button>
           </nav>
 
@@ -81,11 +80,8 @@ const MarketingHeader: React.FC = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/login')}>
-              Sign in
-            </Button>
-            <Button size="sm" className="text-xs" onClick={() => navigate('/login')}>
-              Start free
+            <Button size="sm" className="text-xs" onClick={() => navigate('/app')}>
+              Get started
               <ArrowRight className="ml-1 h-3 w-3" />
             </Button>
           </div>
@@ -124,19 +120,13 @@ const MarketingHeader: React.FC = () => {
                   <DropdownMenuItem onClick={() => handleNav('features')}>
                     Features
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleNav('pricing')}>
-                    Pricing
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleNav('faq')}>
                     FAQ
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/login')}>
-                    Sign in
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               
-              <Button size="sm" className="text-sm h-9 px-4" onClick={() => navigate('/login')}>
+              <Button size="sm" className="text-sm h-9 px-4" onClick={() => navigate('/app')}>
                 Start
               </Button>
             </div>

@@ -85,10 +85,10 @@ export const Landing: React.FC = () => {
     };
     update();
     window.addEventListener('resize', update);
-    window.addEventListener('orientationchange', update as any);
+    window.addEventListener('orientationchange', update);
     return () => {
       window.removeEventListener('resize', update);
-      window.removeEventListener('orientationchange', update as any);
+      window.removeEventListener('orientationchange', update);
     };
   }, []);
 
@@ -225,8 +225,8 @@ export const Landing: React.FC = () => {
               </p>
 
               <div className="mt-3 sm:mt-4 md:mt-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-                <Button size="default" className="w-full sm:w-auto text-sm sm:text-base" onClick={() => navigate('/login?plan=basic')}>
-                  Get started – $20/mo
+                <Button size="default" className="w-full sm:w-auto text-sm sm:text-base" onClick={() => navigate('/app')}>
+                  Get started for free
                 </Button>
                 <Button
                   size="default"
@@ -308,7 +308,7 @@ export const Landing: React.FC = () => {
                   <select
                     id="how-tab"
                     value={howTab}
-                    onChange={(e) => setHowTab(e.target.value as any)}
+                    onChange={(e) => setHowTab(e.target.value as 'lease' | 'bill' | 'offer' | 'subscription')}
                     className="rounded-md border bg-background px-2 py-1 text-sm"
                   >
                     <option value="lease">Lease</option>
@@ -401,70 +401,71 @@ export const Landing: React.FC = () => {
           </div>
         </section>
 
-        {/* PRICING */}
-        <section id="pricing" className="py-16 px-4">
+        {/* FEATURES */}
+        <section id="features" className="py-16 px-4">
           <div className="container mx-auto">
             <div className="text-center mb-10">
-              <Badge variant="secondary">Pricing</Badge>
-              <h2 className="mt-3 text-3xl font-bold">Clarity costs less than confusion</h2>
-              <p className="mt-2 text-muted-foreground">Choose your plan — upgrade anytime.</p>
+              <Badge variant="secondary">Features</Badge>
+              <h2 className="mt-3 text-3xl font-bold">Everything you need, completely free</h2>
+              <p className="mt-2 text-muted-foreground">Fineprnt is open-source and free to use. Upload documents, ask questions, and get precise answers with citations.</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
-              {/* Basic */}
+              {/* Document Processing */}
               <Card className="border-0 shadow-soft hover:shadow-medium transition">
                 <CardHeader>
-                  <CardTitle>Basic</CardTitle>
-                  <CardDescription>Great for a single contract</CardDescription>
+                  <CardTitle>Document Processing</CardTitle>
+                  <CardDescription>Upload any document type</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <div className="text-3xl font-bold">$20<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
+                    <div className="text-3xl font-bold">Unlimited<span className="text-sm font-normal text-muted-foreground"> documents</span></div>
                   </div>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> 1 document / month</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Unlimited chat</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Clause-level receipts (citations)</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> PDF, images, and more</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Automatic OCR and text extraction</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Smart semantic chunking</li>
                   </ul>
-                  <Button className="w-full" onClick={() => navigate('/login?plan=basic')}>Start with Basic</Button>
+                  <Button className="w-full" onClick={() => navigate('/app')}>Start uploading</Button>
                 </CardContent>
               </Card>
 
-              {/* Pro (Most popular) */}
+              {/* AI Chat */}
               <Card className="border-0 shadow-medium ring-1 ring-primary/20 relative">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary text-primary-foreground text-xs px-3 py-1 shadow-soft">Most popular</div>
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary text-primary-foreground text-xs px-3 py-1 shadow-soft">Core Feature</div>
                 <CardHeader>
-                  <CardTitle>Pro</CardTitle>
-                  <CardDescription>For ongoing reviews and multiple docs</CardDescription>
+                  <CardTitle>AI Chat Assistant</CardTitle>
+                  <CardDescription>Ask questions in plain English</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <div className="text-3xl font-bold">$40<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
+                    <div className="text-3xl font-bold">Unlimited<span className="text-sm font-normal text-muted-foreground"> chat</span></div>
                   </div>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> 5 documents / month</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Unlimited chat</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Priority processing</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Natural language queries</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Precise answers with citations</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Page references included</li>
                   </ul>
-                  <Button className="w-full" onClick={() => navigate('/login?plan=pro')}>Upgrade to Pro</Button>
+                  <Button className="w-full" onClick={() => navigate('/app')}>Start chatting</Button>
                 </CardContent>
               </Card>
 
-              {/* One-time credit */}
+              {/* Open Source */}
               <Card className="border-0 shadow-soft hover:shadow-medium transition">
                 <CardHeader>
-                  <CardTitle>One-time credit</CardTitle>
-                  <CardDescription>Need more documents this month?</CardDescription>
+                  <CardTitle>Open Source</CardTitle>
+                  <CardDescription>Free and self-hostable</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <div className="text-3xl font-bold">$12<span className="text-sm font-normal text-muted-foreground"> one-time</span></div>
+                    <div className="text-3xl font-bold">100%<span className="text-sm font-normal text-muted-foreground"> free</span></div>
                   </div>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Adds 1 document credit</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Works with any plan</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> No hidden costs</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Self-hostable</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> Community driven</li>
                   </ul>
-                  
+                  <Button className="w-full" variant="outline" onClick={() => window.open('https://github.com/admlawson/fineprnt_open', '_blank')}>View on GitHub</Button>
                 </CardContent>
               </Card>
             </div>
@@ -536,8 +537,8 @@ export const Landing: React.FC = () => {
             <p className="text-xl text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
               From leases to offers to surprise bills - Fineprnt shows you the truth before it costs you.
             </p>
-            <Button size="lg" variant="secondary" onClick={() => navigate('/login?plan=basic')}>
-              Get started – $20/mo
+            <Button size="lg" variant="secondary" onClick={() => navigate('/app')}>
+              Get started for free
             </Button>
           </div>
         </section>

@@ -1,11 +1,19 @@
+// @ts-expect-error - Deno environment types not available
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { buildCorsHeaders, handleCors } from "../_shared/cors.ts";
+
+// Deno type declarations
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+  serve(handler: (req: Request) => Response | Promise<Response>): void;
+};
 
 type Payload = {
   category?: string;
   message: string;
   email?: string;
-  user_id?: string;
   path?: string;
 }
 
@@ -32,17 +40,12 @@ export default async function handler(req: Request) {
     if (!resendKey) throw new Error('RESEND_API_KEY not set');
 
     const payload = await req.json() as Payload;
-    const { category = 'General', message = '', email = '', user_id = '', path = '' } = payload || {};
+    const { category = 'General', message = '', email = '', path = '' } = payload || {};
     if (!message.trim()) return new Response(JSON.stringify({ error: 'message required' }), { status: 400, headers });
-
-    const supabase = createClient(supabaseUrl, anon, { global: { headers: { Authorization: req.headers.get('Authorization') || '' }}});
-    const userRes = await supabase.auth.getUser();
-    const authUser = userRes.data.user || null;
 
     const body = [
       `Category: ${category}`,
-      `From: ${email || authUser?.email || 'unknown'}`,
-      `User ID: ${user_id || authUser?.id || 'unknown'}`,
+      `From: ${email || 'anonymous'}`,
       `Path: ${path || 'n/a'}`,
       '',
       message
@@ -68,13 +71,15 @@ export default async function handler(req: Request) {
     }
 
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err?.message || 'unknown error' }), { status: 500, headers });
+  } catch (err: unknown) {
+    return new Response(JSON.stringify({ error: (err as Error)?.message || 'unknown error' }), { status: 500, headers });
   }
 }
 
 // Deno.serve entrypoint
-// deno-lint-ignore no-explicit-any
-((globalThis as any).Deno?.serve) && Deno.serve(handler);
+// @ts-expect-error - Deno types not available
+if ((globalThis as { Deno?: { serve?: unknown } }).Deno?.serve) {
+  Deno.serve(handler);
+}
 
 

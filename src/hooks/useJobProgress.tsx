@@ -12,8 +12,8 @@ export interface ProcessingJob {
   started_at?: string;
   completed_at?: string;
   created_at?: string;
-  output_data?: any;
-  input_data?: any;
+  output_data?: unknown;
+  input_data?: unknown;
 }
 
 export type ProcessingStage = 'ingest' | 'ocr' | 'embed';
@@ -25,7 +25,7 @@ export interface ProcessingProgress {
     completedAt?: Date;
     error?: string;
     id?: string;
-    metadata?: any;
+    metadata?: unknown;
   };
   ocr: {
     status: JobStatus;
@@ -33,7 +33,7 @@ export interface ProcessingProgress {
     completedAt?: Date;
     error?: string;
     id?: string;
-    metadata?: any;
+    metadata?: unknown;
   };
   embed: {
     status: JobStatus;
@@ -41,7 +41,7 @@ export interface ProcessingProgress {
     completedAt?: Date;
     error?: string;
     id?: string;
-    metadata?: any;
+    metadata?: unknown;
   };
   overallStatus: 'not_started' | 'in_progress' | 'completed' | 'error';
   completedStages: number;

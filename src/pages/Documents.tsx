@@ -46,9 +46,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { useJobProgress } from '@/hooks/useJobProgress';
-import { SubscriptionGate } from '@/components/auth/SubscriptionGate';
 import { functionUrl } from '@/lib/supabaseEndpoints';
 
 interface Document {
@@ -121,7 +119,7 @@ export const Documents: React.FC = () => {
   const [processingJobs, setProcessingJobs] = useState<Record<string, ProcessingJob[]>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { user, session } = useAuth();
+  // No authentication needed
 
   // Calculate progress based on processing job stages and status
   const calculateProgress = (jobs: ProcessingJob[]): { progress: number; currentStage: string } => {
@@ -154,7 +152,7 @@ export const Documents: React.FC = () => {
 
   // Fetch processing jobs for a document
   const fetchProcessingJobs = async (documentId: string) => {
-    if (!session?.user?.id) return;
+    // No auth check needed
 
     try {
       const { data, error } = await supabase
@@ -190,21 +188,21 @@ export const Documents: React.FC = () => {
   };
   
   const fetchDocuments = async () => {
-    if (!session?.user?.id) return;
+    // No auth check needed
 
     setLoading(true);
     try {
       const res = await supabase
-        .from('documents' as any)
+        .from('documents')
         .select('id, filename, mime_type, file_size, created_at, status')
-        .eq('user_id', session.user.id)
+        // No user filter needed
         .order('created_at', { ascending: false });
 
       if (res.error) throw res.error;
 
-      const data = (res.data as any[]) || [];
+      const data = res.data || [];
 
-      const formattedDocs = data.map((doc: any) => ({
+      const formattedDocs = data.map((doc: { id: string; filename: string; mime_type?: string; file_size?: number; created_at: string; status: string }) => ({
         id: String(doc.id),
         filename: String(doc.filename),
         type: determineDocumentType(String(doc.filename), doc.mime_type as string | undefined),
@@ -276,7 +274,7 @@ export const Documents: React.FC = () => {
   };
 
   const handleRetryProcessing = async (document: Document) => {
-    if (!session?.user?.id) return;
+    // No auth check needed
 
     console.log(`Starting retry for document: ${document.id}`);
     setRetryingDocuments(prev => new Set(prev).add(document.id));
@@ -285,10 +283,10 @@ export const Documents: React.FC = () => {
     try {
       // Reset document status to queued
       const { error: statusError } = await supabase
-        .from('documents' as any)
+        .from('documents')
         .update({ status: 'queued' })
-        .eq('id', document.id)
-        .eq('user_id', session.user.id);
+        .eq('id', document.id);
+        // No user filter needed
 
       if (statusError) {
         console.error('Error updating document status:', statusError);
@@ -335,7 +333,7 @@ export const Documents: React.FC = () => {
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ 
@@ -399,25 +397,25 @@ export const Documents: React.FC = () => {
   };
 
   const handleProcess = async (document: Document) => {
-    if (!session) return;
+    // No session check needed
     
     // Start processing state
     setProcessingDocuments(prev => new Set(prev).add(document.id));
     setProcessingProgress(prev => ({ ...prev, [document.id]: 0 }));
     
     try {
-      const { data: rpcData, error: rpcError } = await (supabase.rpc as any)('start_processing', { p_document_id: document.id });
+      const { data: rpcData, error: rpcError } = await supabase.rpc('start_processing', { p_document_id: document.id });
       if (rpcError) throw rpcError;
-      const ok = (rpcData as any)?.ok;
+      const ok = (rpcData as { ok?: boolean; reason?: string })?.ok;
       if (!ok) {
-        const reason = (rpcData as any)?.reason || 'unknown';
+        const reason = (rpcData as { ok?: boolean; reason?: string })?.reason || 'unknown';
         toast({ title: 'Cannot process', description: reason === 'insufficient_credits' ? 'Insufficient credits. Upgrade or buy a document credit.' : 'No active period. Please subscribe.', variant: 'destructive' });
         return;
       }
 
       await fetch(functionUrl('ocr_and_annotation'), {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+        headers: { 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ trigger: 'start', document_id: document.id })
       });
 
@@ -449,7 +447,7 @@ export const Documents: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!session?.user?.id) return;
+    // No auth check needed
 
     fetchDocuments();
 
@@ -461,7 +459,7 @@ export const Documents: React.FC = () => {
           event: '*',
           schema: 'public',
           table: 'documents',
-          filter: `user_id=eq.${session.user.id}`
+          filter: `id=neq.00000000-0000-0000-0000-000000000000`
         },
         (payload) => {
           console.log('Document change:', payload);
@@ -520,15 +518,9 @@ export const Documents: React.FC = () => {
       setProcessingProgress({});
       setProcessingJobs({});
     };
-  }, [session?.user?.id]);
+  }, []);
 
-  if (!user || !session) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-muted-foreground">Please log in to access documents.</p>
-      </div>
-    );
-  }
+  // No authentication check needed
 
   const filteredDocuments = documents.filter(doc =>
     doc.filename.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -554,7 +546,7 @@ export const Documents: React.FC = () => {
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
           },
           body: formData,
         }
@@ -601,28 +593,19 @@ export const Documents: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     console.log('Starting delete process for document:', id);
-    console.log('User ID:', session?.user?.id);
-
-    if (!session?.user?.id) {
-      toast({
-        title: "Delete failed",
-        description: "Not authenticated. Please refresh and try again.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // No authentication check needed
 
     setDocuments(prev => prev.filter(doc => doc.id !== id));
 
     try {
       const fetchRes = await supabase
-        .from('documents' as any)
+        .from('documents')
         .select('storage_path')
         .eq('id', id)
-        .eq('user_id', session.user.id)
+        // No user filter needed
         .single();
 
-      const document = (fetchRes.data as any) as { storage_path?: string } | null;
+      const document = fetchRes.data as { storage_path?: string } | null;
       const fetchError = fetchRes.error;
 
       if (fetchError) {
@@ -637,7 +620,7 @@ export const Documents: React.FC = () => {
         // No need to strip bucket name since it's already the relative path
         const storagePath = document.storage_path;
         console.log('Deleting from storage with path:', storagePath);
-        console.log('User ID:', session.user.id);
+        // No user ID needed
         
         const pathInBucket = storagePath.replace('documents/', '');
         const { error: storageError } = await supabase.storage
@@ -690,10 +673,10 @@ export const Documents: React.FC = () => {
 
       console.log('Deleting documents record...');
       const { error } = await supabase
-        .from('documents' as any)
+        .from('documents')
         .delete()
-        .eq('id', id)
-        .eq('user_id', session.user.id);
+        .eq('id', id);
+        // No user filter needed
 
       if (error) {
         console.error('Failed to delete document record:', error);
@@ -724,10 +707,10 @@ export const Documents: React.FC = () => {
 
     try {
       const { error } = await supabase
-        .from('documents' as any)
+        .from('documents')
         .update({ filename: newFilename.trim() })
-        .eq('id', selectedDocument.id)
-        .eq('user_id', session?.user?.id as string);
+        .eq('id', selectedDocument.id);
+        // No user filter needed
 
       if (error) throw error;
 
@@ -790,7 +773,6 @@ export const Documents: React.FC = () => {
   };
 
   return (
-    <SubscriptionGate feature="document management">
       <div className="flex flex-col h-full bg-background">
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-border">
@@ -1056,6 +1038,5 @@ export const Documents: React.FC = () => {
          </DialogContent>
           </Dialog>
        </div>
-    </SubscriptionGate>
   );
 };

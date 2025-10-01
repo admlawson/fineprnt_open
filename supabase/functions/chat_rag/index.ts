@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-expect-error - Deno environment types not available
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -343,21 +343,15 @@ serve(async (req) => {
     }
     if (!latestUserMessage) throw new Error("No user message found");
 
-    // --- Supabase client & auth ---
+    // --- Supabase client (no auth needed) ---
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) throw new Error("Authorization header required");
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) throw new Error("Invalid or expired token");
-
-    // B2C: no org lookup required
-
-    // Optional: verify session ownership
+    
+    // Use default user ID for no-auth setup
+    const userId = '00000000-0000-0000-0000-000000000000';
     if (session_id) {
       const { data: sessionRow, error: sessionErr } = await supabase
         .from("chat_sessions")
-        .select("id, user_id, document_id, message_count")
+        .select("id, document_id, message_count")
         .eq("id", session_id)
         .single();
 
@@ -367,9 +361,9 @@ serve(async (req) => {
           headers: { ...buildCorsHeaders(req.headers.get('origin') ?? undefined), "Content-Type": "application/json" },
         });
       }
-      if (sessionRow.user_id !== user.id || (document_id && sessionRow.document_id !== document_id)) {
-        return new Response(JSON.stringify({ error: "Forbidden: session not owned by user" }), {
-          status: 403,
+      if (document_id && sessionRow.document_id !== document_id) {
+        return new Response(JSON.stringify({ error: "Session document mismatch" }), {
+          status: 400,
           headers: { ...buildCorsHeaders(req.headers.get('origin') ?? undefined), "Content-Type": "application/json" },
         });
       }
@@ -378,12 +372,12 @@ serve(async (req) => {
     // --- Document name (verify ownership) ---
     const { data: document } = await supabase
       .from("documents")
-      .select("filename, user_id")
+      .select("filename")
       .eq("id", document_id)
       .single();
-    if (!document || document.user_id !== user.id) {
-      return new Response(JSON.stringify({ error: "Forbidden: document not owned by user" }), {
-        status: 403,
+    if (!document) {
+      return new Response(JSON.stringify({ error: "Document not found" }), {
+        status: 404,
         headers: { ...buildCorsHeaders(req.headers.get('origin') ?? undefined), "Content-Type": "application/json" },
       });
     }
@@ -391,7 +385,7 @@ serve(async (req) => {
     // --- Lightweight per-user rate limit: 30 req / 60s on chat_rag ---
     try {
       const { data: allowed } = await supabase.rpc('check_and_increment_rate_limit', {
-        p_user_id: user.id,
+        p_user_id: userId,
         p_bucket: 'chat_rag',
         p_window_seconds: 60,
         p_limit: 30,
@@ -430,7 +424,7 @@ serve(async (req) => {
     }
 
     // --- Hybrid search with multiple strategies ---
-    let chunks: any[] = [];
+    const chunks: unknown[] = [];
     
     // Strategy 1: Try hybrid search with lower threshold
     try {
@@ -440,12 +434,12 @@ serve(async (req) => {
         match_document_id: document_id,
         match_threshold: 0.15, // Lower threshold for better recall
         match_count: 15,
-        user_org_id: user.id,
+        user_org_id: userId,
       });
       if (res.error) throw res.error;
       if (Array.isArray(res.data)) chunks.push(...res.data);
-    } catch (primaryErr: any) {
-      const msg = String(primaryErr?.message || "").toLowerCase();
+    } catch (primaryErr: unknown) {
+      const msg = String((primaryErr as Error)?.message || "").toLowerCase();
       const missing = msg.includes("could not find the function") || msg.includes("function public.hybrid_search");
       if (!missing) {
         console.error("Search error:", primaryErr);
@@ -554,7 +548,7 @@ serve(async (req) => {
     
     const contextBlocks = safeChunks
       .slice(0, 12)
-      .map((c: any, i: number) => {
+      .map((c: { metadata?: unknown; content?: string; page_number?: number }, i: number) => {
         // Parse metadata if it's a JSON string
         let metadata = c.metadata;
         if (typeof metadata === 'string') {
@@ -596,10 +590,10 @@ Remember: Use the two-lane format with exact headings. Ground all claims in the 
     // Stream from Chat Completions (supports gpt-5 per your docs)
     const stream = await openai.chat.completions.create({
       model: "gpt-5",
-      messages: chatMessages as any,
+      messages: chatMessages as Array<{ role: string; content: string }>,
       max_completion_tokens: 2000,
       // If you want GPT-5 minimal reasoning via Chat Completions:
-      // @ts-ignore - some client versions call this `reasoning_effort`
+      // @ts-expect-error - some client versions call this `reasoning_effort`
       reasoning_effort: "minimal",
       stream: true,
     });
@@ -610,7 +604,7 @@ Remember: Use the two-lane format with exact headings. Ground all claims in the 
     const readable = new ReadableStream<Uint8Array>({
       async start(controller) {
         try {
-          for await (const chunk of stream as AsyncIterable<any>) {
+          for await (const chunk of stream as AsyncIterable<{ choices?: Array<{ delta?: { content?: string } }> }>) {
             // Strictly extract ONLY text deltas
             const delta = chunk?.choices?.[0]?.delta;
             const textPiece =
@@ -669,13 +663,13 @@ Remember: Use the two-lane format with exact headings. Ground all claims in the 
         "X-Accel-Buffering": "no",
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Log full error for debugging but sanitize response
     const isDebugMode = Deno.env.get("DEBUG_MODE") === "true";
-    console.error("Edge function error:", isDebugMode ? error : error?.message);
+    console.error("Edge function error:", isDebugMode ? error : (error as Error)?.message);
     
     const sanitizedError = isDebugMode 
-      ? error?.message ?? String(error)
+      ? (error as Error)?.message ?? String(error)
       : "An error occurred while processing your request";
     
     return new Response(JSON.stringify({ error: sanitizedError }), {

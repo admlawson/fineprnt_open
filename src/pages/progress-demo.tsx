@@ -68,10 +68,10 @@ export default function ProgressDemo() {
       setProcessing(true);
       await triggerOCRJob();
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Upload Error",
-        description: error.message || "Failed to upload document",
+        description: (error as Error).message || "Failed to upload document",
         variant: "destructive",
       });
       console.error("Upload error:", error);
@@ -112,7 +112,7 @@ export default function ProgressDemo() {
       // After a delay, trigger the embedding job
       setTimeout(triggerEmbeddingJob, 3000);
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("OCR job error:", error);
     }
   };
@@ -146,7 +146,7 @@ export default function ProgressDemo() {
         throw new Error('Failed to trigger embedding job');
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Embedding job error:", error);
     } finally {
       setProcessing(false);

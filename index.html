@@ -36,7 +36,7 @@
     <!-- Absolute image URL; 1200x630 recommended -->
     <meta
       property="og:image"
-      content="https://api.fineprnt.com/storage/v1/object/public/website/Fineprint-social-dark.png"
+      content="/images/og.jpg"
     />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -54,7 +54,7 @@
     />
     <meta
       name="twitter:image"
-      content="https://api.fineprnt.com/storage/v1/object/public/website/Fineprint-social-dark.png"
+      content="/images/og.jpg"
     />
     <meta
       name="twitter:image:alt"
@@ -64,14 +64,14 @@
     <!-- <meta name="twitter:site" content="@YourHandle"> -->
 
     <!-- Performance niceties (optional) -->
-    <link rel="preconnect" href="https://api.fineprnt.com" crossorigin />
+    <!-- Removed preconnect to api.fineprnt.com for open source -->
     <!-- Preload the LCP hero image so first render is crisp -->
     <link
       rel="preload"
       as="image"
-      href="https://api.fineprnt.com/storage/v1/object/public/website/Fineprint-social-dark.png"
+      href="/images/og.jpg"
       imagesrcset="
-      https://api.fineprnt.com/storage/v1/object/public/website/Fineprint-social-dark.png 1920w
+      /images/og.jpg 1920w
       "
       imagesizes="100vw"
     />
@@ -80,7 +80,6 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Vercel Web Analytics for Vite/SPA -->
-    <script defer src="/_vercel/insights/script.js"></script>
+    <!-- Vercel Web Analytics for Vite/SPA - removed for open source -->
   </body>
 </html>

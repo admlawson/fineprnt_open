@@ -1,6 +1,15 @@
+// @ts-expect-error - Deno environment types not available
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { buildCorsHeaders, handleCors } from '../_shared/cors.ts';
 import { detectContractType } from '../_shared/contracts.ts';
+
+// Deno type declarations
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+  serve(handler: (req: Request) => Response | Promise<Response>): void;
+};
 
 // --- INTERFACES ---
 interface PageData {
@@ -86,7 +95,7 @@ const legalBoundaries = (s: string) =>
  * Split text into sentences for fine-grained chunking
  */
 const sentenceSplit = (s: string) =>
-  s.split(/(?<=[\.\?\!])\s+(?=[A-Z(""0-9])/).filter(x => x.trim().length);
+  s.split(/(?<=[.?!])\s+(?=[A-Z(""0-9])/).filter(x => x.trim().length);
 
 /**
  * Create SHA1 hash for idempotent upserts using Web Crypto API
@@ -186,7 +195,8 @@ async function createSemanticChunks(pages: PageData[], filename = ''): Promise<O
         });
         
         // Create token overlap tail for next chunk
-        let overlapTokens = 0, tail: string[] = [];
+        let overlapTokens = 0;
+        const tail: string[] = [];
         for (let i = buffer.length - 1; i >= 0 && overlapTokens < OVERLAP_TOKENS; i--) {
           tail.unshift(buffer[i]);
           overlapTokens += estimateTokens(buffer[i]);
@@ -270,7 +280,7 @@ async function generateEmbeddings(chunks: string[]): Promise<number[][]> {
 
         if (response.ok) {
           const result = await response.json();
-          batchEmbeddings = result.data.map((item: any) => item.embedding);
+          batchEmbeddings = result.data.map((item: { embedding: number[] }) => item.embedding);
           
           // Validate embedding dimensions
           for (const embedding of batchEmbeddings) {
@@ -337,8 +347,8 @@ async function storeChunksAndEmbeddings(document_id: string, chunks: Omit<Docume
   }
 }
 
-async function updateJobStatus(job_id: string, status: string, output_data: any = {}, error_message?: string): Promise<void> {
-    const updateData: any = { status, output_data, completed_at: new Date().toISOString() };
+async function updateJobStatus(job_id: string, status: string, output_data: unknown = {}, error_message?: string): Promise<void> {
+    const updateData: { status: string; output_data: unknown; completed_at: string; error_message?: string } = { status, output_data, completed_at: new Date().toISOString() };
     if (error_message) updateData.error_message = error_message;
     const { error } = await supabase.from('processing_jobs').update(updateData).eq('id', job_id);
     if (error) throw new Error(`Job update failed: ${error.message}`);
@@ -390,7 +400,12 @@ async function processEmbeddingJob(job: ProcessingJobData): Promise<void> {
     const chunks = await createSemanticChunks(pages, filename);
     if (chunks.length === 0) throw new Error('No chunks were created.');
 
-    const contentToEmbed = chunks.map(c => c.content);
+    const contentToEmbed = chunks.map(c => c.content).filter(content => content && content.trim().length > 0);
+    
+    if (contentToEmbed.length === 0) {
+      throw new Error('No valid content to embed - all chunks are empty');
+    }
+    
     const embeddings = await generateEmbeddings(contentToEmbed);
 
     await storeChunksAndEmbeddings(job.document_id, chunks, embeddings);
@@ -401,15 +416,17 @@ async function processEmbeddingJob(job: ProcessingJobData): Promise<void> {
       chunks_count: chunks.length,
     });
     
-    // finalize: success true (consume hold + set completed)
-    await supabase.rpc('finalize_processing', { p_document_id: job.document_id, p_success: true });
+    // Mark document as completed
+    await supabase.from('documents').update({ status: 'completed' }).eq('id', job.document_id);
 
-  } catch (error: any) {
-    await updateJobStatus(job.id, 'failed', { failed_at: now }, error.message);
-    // finalize: failure (release hold + set failed)
+  } catch (error: unknown) {
+    await updateJobStatus(job.id, 'failed', { failed_at: now }, (error as Error).message);
+    // Mark document as failed
     try {
-      await supabase.rpc('finalize_processing', { p_document_id: job.document_id, p_success: false });
-    } catch (_) {}
+      await supabase.from('documents').update({ status: 'failed' }).eq('id', job.document_id);
+    } catch {
+      // Ignore errors when marking document as failed
+    }
   }
 }
 

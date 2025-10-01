@@ -1,60 +1,82 @@
-# Clause Chat Sim
+# Fineprnt
 
-Clause Chat Sim (also branded as **fineprnt**) is an AI‑powered platform for uploading, processing, and conversing with organizational documents such as medical contracts. The application combines a React front‑end, Supabase backend, and OpenAI models to deliver document chat with retrieval‑augmented generation (RAG).
+**Fineprnt** is an open-source AI-powered platform for uploading, processing, and conversing with documents. Upload any document, ask questions, and get precise answers with citations. The application combines a React frontend, Supabase backend, Mistral and OpenAI models to deliver document chat with retrieval-augmented generation (RAG).
 
 ## Features
 
-- **Authentication & Profiles** – Email or Azure AD login with profile management, avatars, and domain‑based organization assignment.
-- **Document Library** – Upload contracts, monitor processing (OCR, chunking, embedding), rename or delete files, and retry failed jobs.
-- **Chat Assistant** – Ask questions about a specific document; answers are grounded in indexed content via a Supabase Edge Function.
-- **Subscription Gating** – Enterprise features and limits enforced with trial/enterprise status checks.
-- **Administration** – Invite users, edit roles, and manage organization or platform settings through protected routes.
-- **Responsive UI** – Tailwind CSS and shadcn‑ui components provide a consistent design across dark/light themes.
+- **Document Processing** – Upload any document (PDF, images, etc.) with automatic OCR, text extraction, and semantic chunking
+- **AI Chat Assistant** – Ask questions about your documents and get precise answers with citations and page references
+- **Smart Search** – Hybrid search combining semantic similarity and keyword matching for accurate results
+- **No Authentication Required** – Simple setup without user accounts or complex authentication
+- **Real-time Processing** – Monitor document processing status with detailed progress tracking
+- **Responsive Design** – Modern UI built with Tailwind CSS and shadcn/ui components
+- **Dark/Light Themes** – Automatic theme switching with system preference detection
 
 ## Tech Stack
 
+### Frontend
 - [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) (bootstrapped with [Vite](https://vitejs.dev/))
-- [Tailwind CSS](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
-- [Supabase](https://supabase.com/) for auth, database, storage, and Edge Functions
+- [Tailwind CSS](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/) for styling
 - [TanStack Query](https://tanstack.com/query/latest) for data fetching and caching
+- [React Router](https://reactrouter.com/) for client-side routing
+- [AI SDK](https://sdk.vercel.ai/) for AI chat functionality
+
+### Backend
+- [Supabase](https://supabase.com/) for authentication, database, storage, and Edge Functions
+- [PostgreSQL](https://www.postgresql.org/) with [pgvector](https://github.com/pgvector/pgvector) for vector search
 - [OpenAI](https://openai.com/) for embeddings and chat completion
+- [Mistral AI](https://mistral.ai/) for OCR and document processing
+
+### Infrastructure
+- [Vercel](https://vercel.com/) for frontend deployment
+- [Supabase Edge Functions](https://supabase.com/docs/guides/functions) for serverless backend
+- [Supabase Storage](https://supabase.com/docs/guides/storage) for document storage
 
 ## Project Structure
 
 ```
-├── docs/                     # Additional documentation (e.g., email setup)
-├── public/                   # Static assets
+├── docs/                     # Documentation and refactor plans
+├── public/                   # Static assets and favicons
 ├── src/
 │   ├── components/
-│   │   ├── admin/            # User management dialogs
-│   │   ├── auth/             # Auth-related components (subscription gate, profile)
-│   │   ├── layout/           # App layout, sidebar, top bar
-│   │   └── ui/               # shadcn-ui building blocks
-│   ├── contexts/             # Auth and theme providers
-│   ├── hooks/                # Custom React hooks (chat sessions, org data, jobs)
+│   │   ├── admin/            # User and organization management
+│   │   ├── auth/             # Authentication components
+│   │   ├── layout/           # App layout, sidebar, headers
+│   │   ├── navigation/       # Navigation utilities
+│   │   └── ui/               # shadcn/ui component library
+│   ├── contexts/             # React contexts (Auth, Theme)
+│   ├── hooks/                # Custom React hooks
 │   ├── integrations/
-│   │   └── supabase/         # Supabase client and generated types
-│   ├── lib/                  # Utilities and constants (Supabase keys, helpers)
-│   ├── pages/                # Application pages (Chat, Documents, Admin, etc.)
-│   └── main.tsx, App.tsx     # App entry and routing configuration
+│   │   └── supabase/         # Supabase client and types
+│   ├── lib/                  # Utilities, constants, and helpers
+│   ├── pages/                # Application pages and routes
+│   └── types/                # TypeScript type definitions
 ├── supabase/
-│   ├── functions/            # Edge Functions for document pipeline & chat
-│   ├── migrations/           # SQL migrations for the Supabase database
+│   ├── functions/            # Edge Functions for document processing
+│   ├── migrations/           # Database schema migrations
 │   └── config.toml           # Supabase CLI configuration
-└── package.json              # NPM scripts and dependencies
+└── package.json              # Dependencies and scripts
 ```
 
 ## Supabase Edge Functions
 
-Document processing and chat rely on a series of Edge Functions located in `supabase/functions/`:
+The document processing pipeline is powered by several Edge Functions in `supabase/functions/`:
 
-1. **ingest_upload_metadata** – Validates uploads, checks duplicates, and stores metadata.
-2. **ocr_and_annotation** – Performs OCR and annotates documents.
-3. **chunk_and_embed** – Chunks text and generates embeddings for search.
-4. **chat_rag** – Serves chat requests, performs hybrid search, and streams OpenAI responses.
-5. **00_mistral_test** – Example/test function for model calls.
+### Document Processing Pipeline
+1. **ingest_upload_metadata** – Validates document uploads, checks for duplicates, and stores metadata
+2. **ocr_and_annotation** – Performs OCR using Mistral AI and extracts structured annotations
+3. **chunk_and_embed** – Creates semantic chunks and generates embeddings using OpenAI
 
-Shared utilities live in `supabase/functions/_shared` and `import_map.json` defines edge runtime imports.
+### Chat & Search
+4. **chat_rag** – Handles chat requests with hybrid search (semantic + keyword) and streams responses
+
+### Communication (Optional)
+5. **send-feedback** – Sends user feedback emails via Resend (optional)
+6. **send-support** – Handles support ticket submissions (optional)
+
+### Utilities
+- Shared utilities in `_shared/` directory
+- `import_map.json` defines edge runtime imports
 
 ## Available Scripts
 
@@ -68,43 +90,86 @@ Shared utilities live in `supabase/functions/_shared` and `import_map.json` defi
 
 ## Getting Started
 
-1. **Prerequisites** – Node.js and npm installed.
+### Prerequisites
+- Node.js 18+ and npm
+- Supabase account and project
+- OpenAI API key
+- Mistral AI API key (for OCR)
+
+### No Authentication Required
+This open-source version runs without user authentication, making it perfect for personal use, demos, or small teams. All documents and chat sessions are shared across all users.
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/admlawson/fineprnt_open.git
+   cd fineprnt_open
+   ```
+
 2. **Install dependencies**
    ```bash
    npm install
    ```
-3. **Configure Supabase**
-   - The default project points to demo credentials in `src/lib/constants.ts`.
-   - For your own project, update `SUPABASE_URL` and `SUPABASE_ANON_KEY` or load them from environment variables.
-4. **Run locally**
+
+3. **Set up Supabase**
+   - Create a new Supabase project
+   - Run the migrations in `supabase/migrations/`
+   - Deploy the Edge Functions
+   - **Important**: The database is configured for no authentication - all data is shared
+
+4. **Configure environment variables**
+   - Copy `env.example` to `.env.local`
+   - Set up your Supabase project URL and keys
+   - Set up your OpenAI API key
+   - Set up your Mistral AI API key
+
+5. **Run locally**
    ```bash
    npm run dev
    ```
-   The app will be available at `http://localhost:5173` by default.
-5. **Lint the code**
-   ```bash
-   npm run lint
-   ```
+   The app will be available at `http://localhost:5173` - start uploading documents immediately!
+
 6. **Build for production**
    ```bash
    npm run build
    npm run preview
    ```
 
-## Related Documentation
-
-- [Email setup guide](docs/email-setup.md) – Configure Resend for custom auth emails.
-
 ## Contributing
 
-1. Fork and clone the repository.
-2. Create commits against the main branch (no feature branches required here).
-3. Ensure `npm run lint` completes without errors.
-4. Submit a pull request with a clear description of your changes.
+We welcome contributions to Fineprnt! Here's how you can help:
+
+1. **Fork the repository** and clone your fork
+2. **Create a feature branch** for your changes
+3. **Make your changes** and ensure they work properly
+4. **Run the linter** to check for code quality issues:
+   ```bash
+   npm run lint
+   ```
+5. **Submit a pull request** with a clear description of your changes
+
+### Development Guidelines
+
+- Follow the existing code style and patterns
+- Add tests for new features when possible
+- Update documentation for any API changes
+- Ensure all linting checks pass
 
 ## License
 
-This project does not yet specify a license.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-//just getting vercel to pickup the repo switch
+## Support
+
+- **Documentation**: Check the `docs/` directory for detailed guides
+- **Issues**: Report bugs and request features via [GitHub Issues](https://github.com/admlawson/fineprnt_open/issues)
+- **Discussions**: Join the conversation in [GitHub Discussions](https://github.com/admlawson/fineprnt_open/discussions)
+
+## Acknowledgments
+
+- Built with [Supabase](https://supabase.com/) for backend infrastructure
+- Powered by [OpenAI](https://openai.com/) for AI capabilities
+- OCR processing by [Mistral AI](https://mistral.ai/)
+- UI components from [shadcn/ui](https://ui.shadcn.com/)
 

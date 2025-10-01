@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Send, FileText, Loader2, AlertTriangle, Settings } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { SUPABASE_ANON_KEY } from '@/lib/constants';
@@ -65,7 +64,7 @@ export const Chat: React.FC = () => {
   const [uiError, setUiError] = useState<string | null>(null);
   const [contractContext, setContractContext] = useState<string>('auto');
 
-  const { user, session } = useAuth();
+  // No authentication needed
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -90,14 +89,12 @@ export const Chat: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Fetch user's documents
+  // Fetch documents (no auth)
   useEffect(() => {
     const fetchDocuments = async () => {
-      if (!session?.user?.id) return;
       const { data, error } = await supabase
         .from('documents')
         .select('id, filename, status, created_at')
-        .eq('user_id', session.user.id)
         .eq('status', 'completed')
         .order('created_at', { ascending: false });
 
@@ -109,7 +106,7 @@ export const Chat: React.FC = () => {
     };
 
     fetchDocuments();
-  }, [session?.user?.id]);
+  }, []);
 
   // Load session details when session is selected
   useEffect(() => {
@@ -118,11 +115,11 @@ export const Chat: React.FC = () => {
 
       const { data, error } = await supabase
         .from('chat_sessions')
-        .select('document_id, user_id')
+        .select('document_id')
         .eq('id', selectedSession)
         .single();
 
-      if (error || !data || (session?.user?.id && data.user_id !== session.user.id)) {
+      if (error || !data) {
         console.warn('Session not accessible or not found — starting new chat');
         setSelectedSession('');
         setSelectedDocument('');
@@ -157,7 +154,7 @@ export const Chat: React.FC = () => {
         return;
       }
 
-      const loaded: ChatMessage[] = (data || []).map((msg: any) => ({
+      const loaded: ChatMessage[] = (data || []).map((msg: { id: string; role: string; content: string; created_at: string }) => ({
         id: msg.id,
         role: msg.role as 'user' | 'assistant',
         content: String(msg.content ?? ''),
@@ -222,7 +219,7 @@ export const Chat: React.FC = () => {
 
   // Create new chat session
   const createNewSession = async (firstMessage?: string) => {
-    if (!selectedDocument || !session?.user?.id) return null;
+    if (!selectedDocument) return null;
 
     try {
       const title = firstMessage 
@@ -232,7 +229,6 @@ export const Chat: React.FC = () => {
       const { data, error } = await supabase
         .from('chat_sessions')
         .insert({
-          user_id: session.user.id,
           document_id: selectedDocument,
           title,
           message_count: 0
@@ -288,13 +284,13 @@ export const Chat: React.FC = () => {
   };
 
   // STREAMING CALL DIRECT TO SUPABASE EDGE FUNCTION
-  const callEdgeFunctionStream = async (payload: any) => {
+  const callEdgeFunctionStream = async (payload: { session_id: string; messages: Array<{ role: string; content: string }> }) => {
     const url = functionUrl('chat_rag');
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        authorization: `Bearer ${session?.access_token ?? ''}`,
+        authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         apikey: SUPABASE_ANON_KEY,
       },
       body: JSON.stringify(payload),
@@ -337,7 +333,7 @@ export const Chat: React.FC = () => {
     setUiError(null);
 
     const text = inputText.trim();
-    if (!text || !selectedDocument || !session) return;
+    if (!text || !selectedDocument) return;
 
     setIsLoading(true);
 
@@ -376,9 +372,9 @@ export const Chat: React.FC = () => {
       // Assistant message is persisted by the Edge Function to avoid duplicates
 
       setInputText('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Chat submit error:', err);
-      setUiError(err?.message || 'Unknown error');
+      setUiError((err as Error)?.message || 'Unknown error');
       // if we showed an empty assistant bubble, keep it but mark error text
       setMessages((prev) => {
         const next = [...prev];
@@ -398,7 +394,7 @@ export const Chat: React.FC = () => {
 
   // Suggested question handler
   const handleSuggestedQuestion = async (question: string) => {
-    if (!selectedDocument || !session) return;
+    if (!selectedDocument) return;
     setUiError(null);
     setIsLoading(true);
 
@@ -431,9 +427,9 @@ export const Chat: React.FC = () => {
       });
 
       // Assistant message is persisted by the Edge Function to avoid duplicates
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Suggested question error:', err);
-      setUiError(err?.message || 'Unknown error');
+      setUiError((err as Error)?.message || 'Unknown error');
       setMessages((prev) => {
         const next = [...prev];
         const last = next[next.length - 1];
@@ -895,7 +891,7 @@ export const Chat: React.FC = () => {
                   {message.role === 'user' && (
                     <Avatar className="w-8 h-8 bg-secondary">
                       <AvatarFallback className="text-secondary-foreground text-sm">
-                        {user?.email?.substring(0, 2).toUpperCase() || 'U'}
+                        {'U'}
                       </AvatarFallback>
                     </Avatar>
                   )}

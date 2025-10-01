@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -28,8 +27,6 @@ import {
   Sun,
   Moon,
   Monitor,
-  LogOut,
-  CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -37,8 +34,6 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { UserProfileDialog } from '@/components/auth/UserProfileDialog';
-import { SubscriptionStartDialog } from '@/components/auth/SubscriptionStartDialog';
 import { useToast } from '@/hooks/use-toast';
 import { functionUrl } from '@/lib/supabaseEndpoints';
 
@@ -63,7 +58,7 @@ interface Document {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile = false }) => {
-  const { user, session, logout } = useAuth();
+  // No authentication needed
   const { resolvedTheme, setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -78,39 +73,31 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
   const [feedbackEmail, setFeedbackEmail] = useState('');
   const [sendingFeedback, setSendingFeedback] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
-  const [supportCategory, setSupportCategory] = useState<'Document upload' | 'Processing issues' | 'Billing & credits' | 'Account & login' | 'Chat answers' | 'Feature request' | 'Other'>('Document upload');
+  const [supportCategory, setSupportCategory] = useState<'Document upload' | 'Processing issues' | 'Account & login' | 'Chat answers' | 'Feature request' | 'Other'>('Document upload');
   const [supportMessage, setSupportMessage] = useState('');
   const [supportEmail, setSupportEmail] = useState('');
   const [sendingSupport, setSendingSupport] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
-  const [credits, setCredits] = useState<{ available: number; total: number } | null>(null);
-  const [subStatus, setSubStatus] = useState<string | null>(null);
-  const [showStartSub, setShowStartSub] = useState(false);
-  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Fetch chat sessions and documents
   useEffect(() => {
     const fetchData = async () => {
-      if (!user?.id) return;
-
-      // Fetch documents (B2C)
+      // Fetch documents (no auth)
       const { data: docsData } = await supabase
-        .from('documents' as any)
+        .from('documents')
         .select('id, filename')
-        .eq('user_id', user.id)
         .eq('status', 'completed')
         .order('created_at', { ascending: false });
 
-      // Fetch chat sessions (B2C)
+      // Fetch chat sessions (no auth)
       const { data: sessionsData } = await supabase
         .from('chat_sessions')
         .select('*')
-        .eq('user_id', user.id)
         .order('updated_at', { ascending: false })
         .limit(20);
 
-      setDocuments(((docsData as any[]) || []).map((d: any) => ({ id: String(d.id), filename: String(d.filename) })));
+      setDocuments((docsData || []).map((d) => ({ id: String(d.id), filename: String(d.filename) })));
       setChatSessions(sessionsData || []);
     };
 
@@ -125,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
           event: '*',
           schema: 'public',
           table: 'chat_sessions',
-          filter: `user_id=eq.${user?.id}`
+          filter: `id=neq.00000000-0000-0000-0000-000000000000`
         },
         () => {
           fetchData(); // Refetch when sessions change
@@ -136,138 +123,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, []);
 
-  // Load credits, subscription status, and user avatar
-  useEffect(() => {
-    const loadCredits = async () => {
-      if (!user?.id) return;
-      
-      try {
-        // Use raw SQL for now until types are updated
-        const { data: credit } = await (supabase as any).rpc('get_credit_summary', { p_user_id: user.id });
-        if (credit && Array.isArray(credit) && credit.length > 0) {
-          const row = credit[0];
-          const start = Number(row.starting_credits ?? 0);
-          const over = Number(row.overage_units ?? 0);
-          const used = Number(row.credits_used ?? 0);
-          setCredits({
-            available: Math.max(0, start + over - used),
-            total: start + over,
-          });
-        }
-      } catch (err) {
-        console.warn('get_credit_summary not available yet');
-        setCredits({ available: 0, total: 0 });
-      }
-    };
-
-    const loadSub = async () => {
-      if (!user?.id) return;
-      
-      try {
-        // Use raw SQL for subscription data
-        const { data: subData } = await (supabase as any).rpc('get_user_subscription', { p_user_id: user.id });
-        if (subData && Array.isArray(subData) && subData.length > 0) {
-          const row = subData[0];
-          setSubStatus(row.status ?? 'inactive');
-        } else {
-          setSubStatus('inactive');
-        }
-      } catch (err) {
-        console.warn('get_user_subscription not available yet');
-        setSubStatus('inactive');
-      }
-    };
-
-    const loadUserAvatar = async () => {
-      if (!user?.id) return;
-      
-      try {
-        // First try to get avatar path from profiles table
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('avatar_path')
-          .eq('id', user.id)
-          .maybeSingle();
-        
-        if (profileData?.avatar_path) {
-          // Generate signed URL for avatar
-          const { data: signed, error: signErr } = await supabase.storage
-            .from('avatars')
-            .createSignedUrl(profileData.avatar_path, 60 * 60); // 1 hour
-          if (!signErr && signed?.signedUrl) {
-            setUserAvatarUrl(signed.signedUrl);
-          } else {
-            setUserAvatarUrl(null);
-          }
-        } else {
-          setUserAvatarUrl(null);
-        }
-      } catch (err) {
-        console.warn('Failed to load user avatar:', err);
-        setUserAvatarUrl(null);
-      }
-    };
-
-    loadCredits();
-    loadSub();
-    loadUserAvatar();
-
-    // Realtime: refresh credits when consumption events occur or credits table changes
-    const channel = supabase
-      .channel('credits-realtime')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'document_usage_log',
-        filter: `user_id=eq.${user?.id || ''}`
-      }, () => { loadCredits(); })
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'document_credits',
-        filter: `user_id=eq.${user?.id || ''}`
-      }, () => { loadCredits(); })
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'documents',
-        filter: `user_id=eq.${user?.id || ''}`
-      }, (payload) => {
-        const newStatus = (payload as any)?.new?.status;
-        if (newStatus === 'completed') {
-          loadCredits();
-        }
-      })
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'profiles',
-        filter: `id=eq.${user?.id || ''}`
-      }, (payload) => {
-        const newAvatarPath = (payload as any)?.new?.avatar_path;
-        if (newAvatarPath) {
-          // Refresh avatar when profile is updated
-          supabase.storage
-            .from('avatars')
-            .createSignedUrl(newAvatarPath, 60 * 60)
-            .then(({ data: signed, error: signErr }) => {
-              if (!signErr && signed?.signedUrl) {
-                setUserAvatarUrl(signed.signedUrl);
-              }
-            })
-            .catch(() => setUserAvatarUrl(null));
-        } else {
-          setUserAvatarUrl(null);
-        }
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id]);
+  // No user avatar needed
 
   const navigationItems = [
     {
@@ -278,7 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
   ];
 
   // B2C: hide org/platform admin items
-  const adminItems: { label: string; icon: any; href: string }[] = [];
+  const adminItems: { label: string; icon: React.ComponentType<{ size?: number; className?: string }>; href: string }[] = [];
 
   const handleNavigation = (href: string) => {
     navigate(href);
@@ -307,8 +165,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
         body: JSON.stringify({
           category: feedbackCategory,
           message: feedbackMessage,
-          email: feedbackEmail || user?.email,
-          user_id: user?.id,
+          email: feedbackEmail || 'user@example.com',
+          user_id: '00000000-0000-0000-0000-000000000000',
           path: window.location.pathname + window.location.search
         })
       });
@@ -337,8 +195,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
         body: JSON.stringify({
           category: supportCategory,
           message: supportMessage,
-          email: supportEmail || user?.email,
-          user_id: user?.id,
+          email: supportEmail || 'user@example.com',
+          user_id: '00000000-0000-0000-0000-000000000000',
           path: window.location.pathname + window.location.search
         })
       });
@@ -451,8 +309,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
             <div className="flex items-center justify-center">
               <img
                 src={resolvedTheme === 'dark' 
-                  ? "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt%20icon%20-%20dark.png"
-                  : "https://api.fineprnt.com/storage/v1/object/public/website/Fineprnt%20icon%20-%20light.png"
+                  ? "/images/Fineprnt icon - dark.png"
+                  : "/images/Fineprnt icon - light.png"
                 }
                 alt="Fineprnt"
                 className="h-10 w-auto"
@@ -654,7 +512,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
                     collapsed ? "px-2" : "px-3"
                   )}
                   onClick={() => {
-                    setFeedbackEmail(user?.email || '');
+                    setFeedbackEmail('user@example.com');
                     setFeedbackOpen(true);
                   }}
                 >
@@ -670,7 +528,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
                     collapsed ? "px-2" : "px-3"
                   )}
                   onClick={() => {
-                    setSupportEmail(user?.email || '');
+                    setSupportEmail('user@example.com');
                     setSupportOpen(true);
                   }}
                 >
@@ -735,67 +593,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
                 </DropdownMenu>
               </div>
 
-              {/* User Menu */}
-              {user && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 px-2">
-                      <Avatar className="h-5 w-5">
-                        {userAvatarUrl ? (
-                          <AvatarImage src={userAvatarUrl} alt="User avatar" />
-                        ) : (
-                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                            {user.name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      {!collapsed && (
-                        <span className="ml-2 text-xs">{user.name.split(' ')[0]}</span>
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64" align="end">
-                    <div className="flex items-center justify-start gap-2 p-2">
-                      <div className="flex flex-col space-y-1 leading-none">
-                        <p className="font-medium">{user.name}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
-                        {credits && (
-                          <p className="text-xs text-muted-foreground">Credits: {credits.available}/{credits.total}</p>
-                        )}
-                      </div>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
-                      Account
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        if (subStatus !== 'active') {
-                          setShowStartSub(true);
-                          return;
-                        }
-                        // already subscribed: open portal
-                        (async () => {
-                          try {
-                            const token = (await supabase.auth.getSession()).data.session?.access_token;
-                            const res = await fetch(functionUrl('stripe-portal'), { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-                            const json = await res.json();
-                            if (json?.url) window.location.href = json.url;
-                          } catch {}
-                        })();
-                      }}
-                    >
-                      <CreditCard size={16} className="mr-2" />
-                      {subStatus === 'active' ? 'Manage/Upgrade plan' : 'Start subscription'}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout}>
-                      <LogOut size={16} className="mr-2" />
-                      Log out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+              {/* No user menu needed */}
             </div>
           </>
         )}
@@ -845,7 +643,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
           </DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
-              {(['Document upload','Processing issues','Billing & credits','Account & login','Chat answers','Feature request','Other'] as const).map((c) => (
+              {(['Document upload','Processing issues','Account & login','Chat answers','Feature request','Other'] as const).map((c) => (
                 <Button key={c} variant={supportCategory===c? 'default':'outline'} size="sm" onClick={() => setSupportCategory(c)}>
                   {c}
                 </Button>
@@ -867,28 +665,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
         </DialogContent>
       </Dialog>
 
-      {/* User Profile Dialog */}
-      <UserProfileDialog 
-        open={showProfileDialog} 
-        onOpenChange={setShowProfileDialog}
-        onAvatarUpdate={(avatarPath) => {
-          if (avatarPath) {
-            // Refresh avatar in sidebar when profile dialog updates it
-            supabase.storage
-              .from('avatars')
-              .createSignedUrl(avatarPath, 60 * 60)
-              .then(({ data: signed, error: signErr }) => {
-                if (!signErr && signed?.signedUrl) {
-                  setUserAvatarUrl(signed.signedUrl);
-                }
-              })
-              .catch(() => setUserAvatarUrl(null));
-          } else {
-            setUserAvatarUrl(null);
-          }
-        }}
-      />
-      <SubscriptionStartDialog open={showStartSub} onOpenChange={setShowStartSub} />
+      {/* No user profile dialog needed */}
     </>
   );
 };

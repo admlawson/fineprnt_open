@@ -5,7 +5,7 @@ export function contentToString(content: unknown): string {
 
   if (Array.isArray(content)) {
     return content
-      .map((part: any) => {
+      .map((part: unknown) => {
         if (typeof part === 'string') return part;
         if (part && typeof part === 'object') {
           if (part.type === 'text' && typeof part.text === 'string') return part.text;
@@ -20,8 +20,10 @@ export function contentToString(content: unknown): string {
       .join('');
   }
 
-  if (typeof content === 'object' && (content as any).type === 'text' && typeof (content as any).text === 'string') {
-    return (content as any).text;
+  if (typeof content === 'object' && content && 'type' in content && 'text' in content && 
+      (content as { type: unknown; text: unknown }).type === 'text' && 
+      typeof (content as { type: unknown; text: unknown }).text === 'string') {
+    return (content as { type: unknown; text: string }).text;
   }
 
   try {

@@ -1,8 +1,9 @@
 export const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:8080',
-  'https://fineprnt.com',
-  'https://www.fineprnt.com',
+  'http://localhost:3000',
+  // Add your production domains here
+  // 'https://your-domain.com',
 ];
 
 export const baseCorsHeaders = {
@@ -19,8 +20,8 @@ export function buildCorsHeaders(origin?: string) {
     } as Record<string, string>;
   }
   
-  // For production, default to the main domain
-  const defaultOrigin = 'https://www.fineprnt.com';
+  // For production, use the first allowed origin or a default
+  const defaultOrigin = ALLOWED_ORIGINS[0] || 'http://localhost:5173';
   return {
     ...baseCorsHeaders,
     'Access-Control-Allow-Origin': defaultOrigin,

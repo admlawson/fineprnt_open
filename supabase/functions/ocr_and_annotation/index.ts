@@ -1,19 +1,31 @@
+// @ts-expect-error - Deno environment types not available
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { buildCorsHeaders, handleCors } from '../_shared/cors.ts';
 
 // Corrected Imports with static strings and forced dependency versions
+// @ts-expect-error - External module types not available
 import { Mistral } from 'https://esm.sh/@mistralai/mistralai@1.7.4?deps=zod@3.23.8';
+// @ts-expect-error - External module types not available
 import { z } from 'https://esm.sh/zod@3.23.8';
+// @ts-expect-error - External module types not available
 import { responseFormatFromZodObject } from 'https://esm.sh/@mistralai/mistralai@1.7.4/extra/structChat.js?deps=zod@3.23.8';
+
+// Deno type declarations
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+  serve(handler: (req: Request) => Response | Promise<Response>): void;
+};
 
 // --- INTERFACES ---
 
 // The result from the Mistral API, containing pages and annotations
 interface OCRResult {
   pages: Array<{ index: number; markdown: string }>;
-  document_annotation?: any;
-  bbox_annotations?: any[];
-  original_metadata?: any;
+  document_annotation?: unknown;
+  bbox_annotations?: unknown[];
+  original_metadata?: unknown;
 }
 
 // Supabase - Interface for the job data
@@ -22,7 +34,7 @@ interface ProcessingJobData {
   document_id: string;
   stage: string;
   status: string;
-  input_data: any;
+  input_data: unknown;
 }
 
 // Document details from the 'documents' table
@@ -129,8 +141,8 @@ async function processWithMistralOCR(document: DocumentDetails): Promise<OCRResu
 
   // --- Pass 1: Full Text Extraction with Retry Logic ---
   console.log(`Starting OCR Pass 1: Full text extraction for ${document.filename}`);
-  let fullTextResponse: any;
-  let lastError: any;
+  let fullTextResponse: unknown;
+  let lastError: unknown;
   
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
@@ -140,15 +152,15 @@ async function processWithMistralOCR(document: DocumentDetails): Promise<OCRResu
         document: { type: "document_url", documentUrl: signedUrl.url }
       });
       
-      if (fullTextResponse.pages && fullTextResponse.pages.length > 0) {
-        console.log(`Pass 1 successful: extracted ${fullTextResponse.pages.length} pages`);
+      if ((fullTextResponse as { pages?: Array<unknown> })?.pages && (fullTextResponse as { pages?: Array<unknown> }).pages!.length > 0) {
+        console.log(`Pass 1 successful: extracted ${(fullTextResponse as { pages: Array<unknown> }).pages.length} pages`);
         break;
       } else {
         throw new Error(`Mistral OCR returned no pages`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
-      console.error(`OCR attempt ${attempt} failed:`, error.message);
+      console.error(`OCR attempt ${attempt} failed:`, (error as Error).message);
       
       if (attempt < 3) {
         console.log(`Waiting ${attempt * 2} seconds before retry...`);
@@ -157,12 +169,12 @@ async function processWithMistralOCR(document: DocumentDetails): Promise<OCRResu
     }
   }
   
-  if (!fullTextResponse || !fullTextResponse.pages || fullTextResponse.pages.length === 0) {
-    throw new Error(`Mistral OCR failed after 3 attempts. Last error: ${lastError?.message || 'Unknown error'}`);
+  if (!fullTextResponse || !(fullTextResponse as { pages?: Array<unknown> }).pages || (fullTextResponse as { pages: Array<unknown> }).pages.length === 0) {
+    throw new Error(`Mistral OCR failed after 3 attempts. Last error: ${(lastError as Error)?.message || 'Unknown error'}`);
   }
 
   // --- Pass 2: Annotation Extraction (First 8 Pages) ---
-  let annotationResult: any = {};
+  let annotationResult: unknown = {};
   try {
     const annotationResponse = await mistralClient.ocr.process({
       model: "mistral-ocr-latest",
@@ -178,10 +190,10 @@ async function processWithMistralOCR(document: DocumentDetails): Promise<OCRResu
   
   // --- Return combined results ---
   return {
-    pages: fullTextResponse.pages || [],
-    document_annotation: annotationResult.document_annotation || null,
-    bbox_annotations: annotationResult.bbox_annotations || [],
-    original_metadata: fullTextResponse.metadata || {},
+    pages: (fullTextResponse as { pages?: Array<{ index: number; markdown: string }> }).pages || [],
+    document_annotation: (annotationResult as { document_annotation?: unknown }).document_annotation || null,
+    bbox_annotations: (annotationResult as { bbox_annotations?: unknown[] }).bbox_annotations || [],
+    original_metadata: (fullTextResponse as { metadata?: unknown }).metadata || {},
   };
 }
 
@@ -208,8 +220,8 @@ async function updateDocumentWithOCRMetadata(document_id: string, ocrResult: OCR
     }
 }
 
-async function updateJobStatus(job_id: string, status: string, output_data: any = {}, error_message?: string): Promise<void> {
-  const updateData: any = { status, output_data, completed_at: new Date().toISOString() };
+async function updateJobStatus(job_id: string, status: string, output_data: unknown = {}, error_message?: string): Promise<void> {
+  const updateData: { status: string; output_data: unknown; completed_at: string; error_message?: string } = { status, output_data, completed_at: new Date().toISOString() };
   if (error_message) updateData.error_message = error_message;
   const { error } = await supabase.from('processing_jobs').update(updateData).eq('id', job_id);
   if (error) throw new Error(`Job update failed: ${error.message}`);
@@ -218,7 +230,7 @@ async function updateJobStatus(job_id: string, status: string, output_data: any 
 /**
  * ENHANCEMENT: This function now accepts the raw pages array to pass to the next stage.
  */
-async function enqueueEmbeddingJob(document_id: string, pages: any[]): Promise<string> {
+async function enqueueEmbeddingJob(document_id: string, pages: unknown[]): Promise<string> {
   const { data, error } = await supabase
     .from('processing_jobs')
     .insert({ 
@@ -262,31 +274,29 @@ async function processOCRJob(job: ProcessingJobData): Promise<void> {
     });
     if (invokeError) throw new Error(`Error triggering embedding function: ${invokeError.message}`);
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     await updateJobStatus(job.id, 'failed', {
       failed_at: new Date().toISOString(),
       processing_time_ms: Date.now() - startTime
-    }, error.message);
-    // release hold and mark failed atomically via RPC
+    }, (error as Error).message);
+    // Mark document as failed
     try {
-      await supabase.rpc('finalize_processing', { p_document_id: job.document_id, p_success: false });
-    } catch (_) {}
+      await supabase.from('documents').update({ status: 'failed' }).eq('id', job.document_id);
+    } catch {
+      // Ignore errors when marking document as failed
+    }
   }
 }
 
 async function processQueuedJobs(): Promise<void> {
-  try {
-    const jobs = await pollForOCRJobs();
-    if (jobs.length === 0) return;
-    for (const job of jobs) {
-      try {
-        await processOCRJob(job);
-      } catch (error) {
-        // Job-specific error already handled in processOCRJob
-      }
+  const jobs = await pollForOCRJobs();
+  if (jobs.length === 0) return;
+  for (const job of jobs) {
+    try {
+      await processOCRJob(job);
+    } catch (error) {
+      // Job-specific error already handled in processOCRJob
     }
-  } catch (error) {
-    throw error;
   }
 }
 
@@ -302,9 +312,9 @@ Deno.serve(async (req: Request) => {
   }
 
   const response = new Response(JSON.stringify({ message: 'OCR processing triggered' }), { status: 202, headers });
-  // @ts-ignore
+  // @ts-expect-error - EdgeRuntime types not available
   if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
-    // @ts-ignore
+    // @ts-expect-error - EdgeRuntime types not available
     EdgeRuntime.waitUntil(processQueuedJobs());
   } else {
     processQueuedJobs().catch(error => console.error('Background job processing failed:', error));
