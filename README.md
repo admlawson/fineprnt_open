@@ -1,12 +1,18 @@
 # Fineprnt
 
-**Fineprnt** is an open-source AI-powered platform for uploading, processing, and conversing with documents. Upload any document, ask questions, and get precise answers with citations. The application combines a React frontend, Supabase backend, Mistral and OpenAI models to deliver document chat with retrieval-augmented generation (RAG).
+**Fineprnt** is an open-source AI-powered platform that makes legal documents accessible, transparent, and easy to understand. Never be stuck or confused by the fine print again.
+
+Upload any document, ask questions, and get precise answers with citations. Our unique two-lane approach separates document-specific facts from general guidance, ensuring you get accurate information grounded in your actual contract while receiving helpful context when needed.
+
+The application combines a React frontend, Supabase backend, Mistral and OpenAI models to deliver document chat with retrieval-augmented generation (RAG) that's designed specifically for legal and business document analysis.
 
 ## Features
 
+- **Two-Lane RAG Approach** – Our unique system separates document-specific facts from general guidance, ensuring accurate citations while providing helpful context
 - **Document Processing** – Upload any document (PDF, images, etc.) with automatic OCR, text extraction, and semantic chunking
 - **AI Chat Assistant** – Ask questions about your documents and get precise answers with citations and page references
 - **Smart Search** – Hybrid search combining semantic similarity and keyword matching for accurate results
+- **Contract Type Detection** – Automatically identifies document types (real estate, employment, medical, etc.) for specialized analysis
 - **No Authentication Required** – Simple setup without user accounts or complex authentication
 - **Real-time Processing** – Monitor document processing status with detailed progress tracking
 - **Responsive Design** – Modern UI built with Tailwind CSS and shadcn/ui components
@@ -35,16 +41,14 @@
 ## Project Structure
 
 ```
-├── docs/                     # Documentation and refactor plans
+├── docs/                     # Documentation and guides
 ├── public/                   # Static assets and favicons
 ├── src/
 │   ├── components/
-│   │   ├── admin/            # User and organization management
-│   │   ├── auth/             # Authentication components
 │   │   ├── layout/           # App layout, sidebar, headers
 │   │   ├── navigation/       # Navigation utilities
 │   │   └── ui/               # shadcn/ui component library
-│   ├── contexts/             # React contexts (Auth, Theme)
+│   ├── contexts/             # React contexts (Theme)
 │   ├── hooks/                # Custom React hooks
 │   ├── integrations/
 │   │   └── supabase/         # Supabase client and types
@@ -53,10 +57,38 @@
 │   └── types/                # TypeScript type definitions
 ├── supabase/
 │   ├── functions/            # Edge Functions for document processing
+│   │   ├── _shared/          # Shared utilities and contracts
+│   │   ├── chat_rag/         # RAG chat with two-lane approach
+│   │   ├── chunk_and_embed/  # Document chunking and embedding
+│   │   ├── ingest_upload_metadata/ # Document upload handling
+│   │   ├── ocr_and_annotation/ # OCR and document processing
+│   │   ├── send-feedback/    # Optional email feedback
+│   │   └── send-support/     # Optional support tickets
 │   ├── migrations/           # Database schema migrations
 │   └── config.toml           # Supabase CLI configuration
+├── .env.example              # Environment variables template
+├── setup.sh                  # Automated setup script
+├── SETUP.md                  # Detailed setup guide
 └── package.json              # Dependencies and scripts
 ```
+
+## Two-Lane RAG Approach
+
+Fineprnt's unique approach to RAG (Retrieval-Augmented Generation) separates document-specific facts from general guidance:
+
+### From your document
+- Contains **only** claims strictly supported by the provided context chunks
+- Every sentence ends with a citation in the format `[p{page}, "{section}"]`
+- Quotes exact language for numbers, definitions, timeframes, obligations, and penalties
+- Never includes outside knowledge or speculation
+
+### General guidance (non-document)
+- Contains optional coaching based on general legal and business knowledge
+- **Never** asserts facts about the specific contract
+- **Never** includes citations to the user's document
+- Provides helpful context when document information is missing
+
+This approach ensures you get accurate, grounded information from your actual contract while receiving helpful context when needed.
 
 ## Supabase Edge Functions
 
@@ -68,14 +100,14 @@ The document processing pipeline is powered by several Edge Functions in `supaba
 3. **chunk_and_embed** – Creates semantic chunks and generates embeddings using OpenAI
 
 ### Chat & Search
-4. **chat_rag** – Handles chat requests with hybrid search (semantic + keyword) and streams responses
+4. **chat_rag** – Handles chat requests with hybrid search (semantic + keyword) and streams responses using the two-lane approach
 
 ### Communication (Optional)
 5. **send-feedback** – Sends user feedback emails via Resend (optional)
 6. **send-support** – Handles support ticket submissions (optional)
 
 ### Utilities
-- Shared utilities in `_shared/` directory
+- Shared utilities in `_shared/` directory including contract type detection
 - `import_map.json` defines edge runtime imports
 
 ## Available Scripts
@@ -92,6 +124,7 @@ The document processing pipeline is powered by several Edge Functions in `supaba
 
 ### Prerequisites
 - Node.js 18+ and npm
+- Docker Desktop (required for Supabase Edge Functions)
 - Supabase account and project
 - OpenAI API key
 - Mistral AI API key (for OCR)
@@ -117,6 +150,7 @@ This open-source version runs without user authentication, making it perfect for
    - Go to your project dashboard → Settings → API
    - Copy your Project URL and anon public key
    - Install the Supabase CLI: `npm install -g supabase`
+   - **Important**: Make sure Docker Desktop is running
    - Link your project: `supabase link --project-ref your-project-id`
    - Run the database migration: `supabase db push`
    - Deploy Edge Functions: `supabase functions deploy`
@@ -167,6 +201,7 @@ This open-source version runs without user authentication, making it perfect for
    ```bash
    npm install -g supabase
    supabase login
+   # Make sure Docker Desktop is running before linking
    supabase link --project-ref your-project-id
    ```
 
@@ -187,6 +222,7 @@ This open-source version runs without user authentication, making it perfect for
 
 1. **Deploy all Edge Functions**
    ```bash
+   # Make sure Docker Desktop is running
    supabase functions deploy
    ```
 
@@ -281,6 +317,11 @@ This open-source version runs without user authentication, making it perfect for
 5. **Storage upload failures**
    - Ensure the `documents` storage bucket exists
    - Check storage policies are correctly configured
+
+6. **Edge Functions deployment failures**
+   - Ensure Docker Desktop is running
+   - Check that Docker is accessible from the command line
+   - Try restarting Docker Desktop if functions fail to deploy
 
 #### Getting Help
 

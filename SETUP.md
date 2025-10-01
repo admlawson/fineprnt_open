@@ -5,6 +5,7 @@ This guide will help you set up Fineprnt from scratch in just a few minutes.
 ## Prerequisites
 
 - Node.js 18+ and npm
+- Docker Desktop (required for Supabase Edge Functions)
 - A Supabase account (free at [supabase.com](https://supabase.com))
 - An OpenAI API key (get one at [platform.openai.com](https://platform.openai.com))
 - A Mistral AI API key (get one at [console.mistral.ai](https://console.mistral.ai))
@@ -52,6 +53,7 @@ VITE_APP_BASE_URL="http://localhost:5173"
 
 ```bash
 # Link your Supabase project (replace with your project ID)
+# Make sure Docker Desktop is running first
 supabase link --project-ref your-project-id
 
 # Run the database migration
@@ -61,6 +63,7 @@ supabase db push
 ### 6. Deploy Edge Functions
 
 ```bash
+# Make sure Docker Desktop is running
 supabase functions deploy
 ```
 
@@ -135,6 +138,11 @@ After setup, verify everything is working:
 **Database connection issues**
 - Verify `VITE_SUPABASE_URL` is correct
 - Check your Supabase project is active
+
+**Edge Functions deployment failures**
+- Ensure Docker Desktop is running
+- Check that Docker is accessible from the command line
+- Try restarting Docker Desktop if functions fail to deploy
 
 ### Getting Help
 

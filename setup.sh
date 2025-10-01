@@ -20,6 +20,20 @@ if ! command -v npm &> /dev/null; then
     exit 1
 fi
 
+# Check if Docker is installed and running
+if ! command -v docker &> /dev/null; then
+    echo "❌ Docker is not installed. Please install Docker Desktop and try again."
+    exit 1
+fi
+
+# Check if Docker is running
+if ! docker info &> /dev/null; then
+    echo "❌ Docker is not running. Please start Docker Desktop and try again."
+    exit 1
+fi
+
+echo "✅ Docker is running"
+
 # Check Node.js version
 NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
 if [ "$NODE_VERSION" -lt 18 ]; then
@@ -59,10 +73,11 @@ echo "1. Create a Supabase project at https://supabase.com"
 echo "2. Edit .env and add your Supabase URL and anon key"
 echo "3. Link your Supabase project: supabase link --project-ref your-project-id"
 echo "4. Run database migration: supabase db push"
-echo "5. Deploy Edge Functions: supabase functions deploy"
+echo "5. Deploy Edge Functions: supabase functions deploy (Docker must be running)"
 echo "6. Set up API keys:"
 echo "   supabase secrets set OPENAI_API_KEY=\"your-openai-key\""
 echo "   supabase secrets set MISTRAL_API_KEY=\"your-mistral-key\""
 echo "7. Start development server: npm run dev"
 echo ""
+echo "⚠️  Important: Keep Docker Desktop running for Edge Functions deployment"
 echo "For detailed instructions, see the README.md file."
