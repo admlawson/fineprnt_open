@@ -37,6 +37,7 @@ The application combines a React frontend, Supabase backend, Mistral and OpenAI 
 - [Vercel](https://vercel.com/) for frontend deployment
 - [Supabase Edge Functions](https://supabase.com/docs/guides/functions) for serverless backend
 - [Supabase Storage](https://supabase.com/docs/guides/storage) for document storage
+- [Supabase Database](https://supabase.com/docs/guides/database/overview) for Database storage
 
 ## Project Structure
 
