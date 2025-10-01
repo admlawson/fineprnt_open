@@ -28,7 +28,7 @@ The application combines a React frontend, Supabase backend, Mistral and OpenAI 
 - [AI SDK](https://sdk.vercel.ai/) for AI chat functionality
 
 ### Backend
-- [Supabase](https://supabase.com/) for authentication, database, storage, and Edge Functions
+- [Supabase](https://supabase.com/) for database, storage, and Edge Functions
 - [PostgreSQL](https://www.postgresql.org/) with [pgvector](https://github.com/pgvector/pgvector) for vector search
 - [OpenAI](https://openai.com/) for embeddings and chat completion
 - [Mistral AI](https://mistral.ai/) for OCR and document processing
