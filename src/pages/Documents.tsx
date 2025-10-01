@@ -48,6 +48,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useJobProgress } from '@/hooks/useJobProgress';
 import { functionUrl } from '@/lib/supabaseEndpoints';
+import { isMockMode, showMockModeNotification } from '@/lib/mockMode';
+import { MockDataService } from '@/lib/mockData';
 
 interface Document {
   id: string;
@@ -192,6 +194,27 @@ export const Documents: React.FC = () => {
 
     setLoading(true);
     try {
+      if (isMockMode()) {
+        // Use mock data when in mock mode
+        const { data, error } = await MockDataService.getDocuments();
+        if (error) throw error;
+
+        const formattedDocs = (data || []).map((doc) => ({
+          id: String(doc.id),
+          filename: String(doc.filename),
+          type: determineDocumentType(String(doc.filename), doc.mime_type as string | undefined),
+          size: formatFileSize(typeof doc.file_size === 'number' ? doc.file_size : undefined),
+          uploadDate: new Date(doc.created_at as string),
+          status: mapDatabaseStatus(String(doc.status)),
+          file_size: doc.file_size as number | undefined,
+          mime_type: doc.mime_type as string | undefined
+        }));
+
+        setDocuments(formattedDocs);
+        return;
+      }
+
+      // Original Supabase code (unchanged)
       const res = await supabase
         .from('documents')
         .select('id, filename, mime_type, file_size, created_at, status')
@@ -451,16 +474,18 @@ export const Documents: React.FC = () => {
 
     fetchDocuments();
 
-    const channel = supabase
-      .channel('documents-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'documents',
-          filter: `id=neq.00000000-0000-0000-0000-000000000000`
-        },
+    // Set up real-time subscription (only in real mode)
+    if (!isMockMode()) {
+      const channel = supabase
+        .channel('documents-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'documents',
+            filter: `id=neq.00000000-0000-0000-0000-000000000000`
+          },
         (payload) => {
           console.log('Document change:', payload);
           
@@ -511,13 +536,14 @@ export const Documents: React.FC = () => {
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-      // Clean up any processing state
-      setProcessingDocuments(new Set());
-      setProcessingProgress({});
-      setProcessingJobs({});
-    };
+      return () => {
+        supabase.removeChannel(channel);
+        // Clean up any processing state
+        setProcessingDocuments(new Set());
+        setProcessingProgress({});
+        setProcessingJobs({});
+      };
+    }
   }, []);
 
   // No authentication check needed
@@ -595,9 +621,17 @@ export const Documents: React.FC = () => {
     console.log('Starting delete process for document:', id);
     // No authentication check needed
 
+    if (isMockMode()) {
+      // Mock mode: just update local state
+      setDocuments(prev => prev.filter(doc => doc.id !== id));
+      toast({ title: 'Demo Mode', description: 'Document deletion is disabled in demo mode.' });
+      return;
+    }
+
     setDocuments(prev => prev.filter(doc => doc.id !== id));
 
     try {
+      // Original Supabase code (unchanged)
       const fetchRes = await supabase
         .from('documents')
         .select('storage_path')
@@ -706,6 +740,21 @@ export const Documents: React.FC = () => {
     if (!selectedDocument || !newFilename.trim()) return;
 
     try {
+      if (isMockMode()) {
+        // Mock mode: just update local state
+        setDocuments(prev => prev.map(doc => 
+          doc.id === selectedDocument.id 
+            ? { ...doc, filename: newFilename.trim() }
+            : doc
+        ));
+        toast({ title: 'Demo Mode', description: 'Document renamed in demo mode.' });
+        setRenameDialogOpen(false);
+        setSelectedDocument(null);
+        setNewFilename('');
+        return;
+      }
+
+      // Original Supabase code (unchanged)
       const { error } = await supabase
         .from('documents')
         .update({ filename: newFilename.trim() })

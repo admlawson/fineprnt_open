@@ -36,6 +36,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { functionUrl } from '@/lib/supabaseEndpoints';
+import { isMockMode, showMockModeNotification } from '@/lib/mockMode';
+import { MockDataService } from '@/lib/mockData';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -83,6 +85,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
   // Fetch chat sessions and documents
   useEffect(() => {
     const fetchData = async () => {
+      if (isMockMode()) {
+        // Use mock data when in mock mode
+        const { data: docsData } = await MockDataService.getDocuments({ status: 'completed' });
+        const { data: sessionsData } = await MockDataService.getChatSessions(20);
+
+        setDocuments((docsData || []).map((d) => ({ id: String(d.id), filename: String(d.filename) })));
+        setChatSessions(sessionsData || []);
+        return;
+      }
+
+      // Original Supabase code (unchanged)
       // Fetch documents (no auth)
       const { data: docsData } = await supabase
         .from('documents')
@@ -103,26 +116,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
 
     fetchData();
 
-    // Set up real-time subscription for chat sessions
-    const channel = supabase
-      .channel('chat-sessions-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'chat_sessions',
-          filter: `id=neq.00000000-0000-0000-0000-000000000000`
-        },
-        () => {
-          fetchData(); // Refetch when sessions change
-        }
-      )
-      .subscribe();
+    // Set up real-time subscription for chat sessions (only in real mode)
+    if (!isMockMode()) {
+      const channel = supabase
+        .channel('chat-sessions-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'chat_sessions',
+            filter: `id=neq.00000000-0000-0000-0000-000000000000`
+          },
+          () => {
+            fetchData(); // Refetch when sessions change
+          }
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, []);
 
   // No user avatar needed
@@ -158,6 +173,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
     }
     try {
       setSendingFeedback(true);
+      
+      if (isMockMode()) {
+        // Mock mode: simulate feedback submission
+        console.log('Mock feedback submitted:', { category: feedbackCategory, message: feedbackMessage, email: feedbackEmail });
+        toast({ title: 'Demo Mode', description: 'Feedback submission is disabled in demo mode.' });
+        return;
+      }
+
+      // Original Supabase code (unchanged)
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       const res = await fetch(functionUrl('send-feedback'), {
         method: 'POST',
@@ -188,6 +212,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
     }
     try {
       setSendingSupport(true);
+      
+      if (isMockMode()) {
+        // Mock mode: simulate support submission
+        console.log('Mock support request submitted:', { category: supportCategory, message: supportMessage, email: supportEmail });
+        toast({ title: 'Demo Mode', description: 'Support requests are disabled in demo mode.' });
+        return;
+      }
+
+      // Original Supabase code (unchanged)
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       const res = await fetch(functionUrl('send-support'), {
         method: 'POST',
@@ -214,6 +247,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, isMobile 
   const deleteSession = async (sessionId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
+      if (isMockMode()) {
+        // Mock mode: just update local state
+        setChatSessions(prev => prev.filter(session => session.id !== sessionId));
+        toast({ title: 'Session deleted', description: 'Session removed in demo mode.' });
+        return;
+      }
+
+      // Original Supabase code (unchanged)
       // Delete associated messages first
       await supabase
         .from('chat_messages')

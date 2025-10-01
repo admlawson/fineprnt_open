@@ -10,6 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { SUPABASE_ANON_KEY } from '@/lib/constants';
 import { functionUrl } from '@/lib/supabaseEndpoints';
+import { isMockMode } from '@/lib/mockMode';
+import { MockDataService } from '@/lib/mockData';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -92,6 +94,18 @@ export const Chat: React.FC = () => {
   // Fetch documents (no auth)
   useEffect(() => {
     const fetchDocuments = async () => {
+      if (isMockMode()) {
+        // Use mock data when in mock mode
+        const { data, error } = await MockDataService.getDocuments({ status: 'completed' });
+        if (error) {
+          console.error('Error fetching mock documents:', error);
+          return;
+        }
+        setDocuments(data || []);
+        return;
+      }
+
+      // Original Supabase code (unchanged)
       const { data, error } = await supabase
         .from('documents')
         .select('id, filename, status, created_at')
@@ -113,6 +127,32 @@ export const Chat: React.FC = () => {
     const loadSessionDetails = async () => {
       if (!selectedSession) return;
 
+      if (isMockMode()) {
+        // Use mock data when in mock mode
+        const { data, error } = await MockDataService.getChatSessions();
+        if (error || !data) {
+          console.warn('Mock session not found — starting new chat');
+          setSelectedSession('');
+          setSelectedDocument('');
+          setMessages([]);
+          navigate('/app/chat', { replace: true });
+          return;
+        }
+        
+        const session = data.find(s => s.id === selectedSession);
+        if (session) {
+          setSelectedDocument(session.document_id);
+        } else {
+          console.warn('Mock session not found — starting new chat');
+          setSelectedSession('');
+          setSelectedDocument('');
+          setMessages([]);
+          navigate('/app/chat', { replace: true });
+        }
+        return;
+      }
+
+      // Original Supabase code (unchanged)
       const { data, error } = await supabase
         .from('chat_sessions')
         .select('document_id')
@@ -143,6 +183,42 @@ export const Chat: React.FC = () => {
         return;
       }
 
+      if (isMockMode()) {
+        // Use mock data when in mock mode
+        const { data, error } = await MockDataService.getChatMessages(selectedSession);
+        if (error) {
+          console.error('Error loading mock session messages:', error);
+          return;
+        }
+
+        const loaded: ChatMessage[] = (data || []).map((msg) => ({
+          id: msg.id,
+          role: msg.role as 'user' | 'assistant',
+          content: String(msg.content ?? ''),
+          createdAt: msg.created_at ? new Date(msg.created_at) : undefined,
+        }));
+
+        // Deduplicate consecutive identical assistant messages (often from double-save)
+        const deduped: ChatMessage[] = [];
+        for (const m of loaded) {
+          const prev = deduped[deduped.length - 1];
+          if (
+            prev &&
+            prev.role === 'assistant' &&
+            m.role === 'assistant' &&
+            prev.content.trim() !== '' &&
+            prev.content.trim() === m.content.trim()
+          ) {
+            continue; // skip duplicate assistant message
+          }
+          deduped.push(m);
+        }
+
+        setMessages(deduped);
+        return;
+      }
+
+      // Original Supabase code (unchanged)
       const { data, error } = await supabase
         .from('chat_messages')
         .select('*')
@@ -186,6 +262,13 @@ export const Chat: React.FC = () => {
   // Save message to session (DB)
   const saveMessageToSession = async (sessionId: string, message: { role: 'user' | 'assistant'; content: string }) => {
     try {
+      if (isMockMode()) {
+        // Mock mode: just log the message
+        console.log('Mock: Saving message to session', sessionId, message);
+        return;
+      }
+
+      // Original Supabase code (unchanged)
       const { data: sessionData } = await supabase
         .from('chat_sessions')
         .select('message_count')
@@ -226,6 +309,20 @@ export const Chat: React.FC = () => {
         ? generateSessionTitle(firstMessage)
         : 'New Chat';
 
+      if (isMockMode()) {
+        // Use mock data when in mock mode
+        const { data, error } = await MockDataService.createChatSession(selectedDocument, title);
+        if (error) throw error;
+
+        setSelectedSession(data!.id);
+        setMessages([]);
+        
+        // Update URL to reflect the session
+        window.history.pushState({}, '', `/app/chat?session=${data!.id}`);
+        return data!.id;
+      }
+
+      // Original Supabase code (unchanged)
       const { data, error } = await supabase
         .from('chat_sessions')
         .insert({
@@ -285,6 +382,30 @@ export const Chat: React.FC = () => {
 
   // STREAMING CALL DIRECT TO SUPABASE EDGE FUNCTION
   const callEdgeFunctionStream = async (payload: { session_id: string; messages: Array<{ role: string; content: string }> }) => {
+    if (isMockMode()) {
+      // Simulate streaming response in mock mode
+      const mockResponse = "This is a mock response. The actual AI service is not available in demo mode.";
+      let full = '';
+      
+      // Simulate streaming by updating the message progressively
+      for (let i = 0; i < mockResponse.length; i++) {
+        full += mockResponse[i];
+        setMessages((prev) => {
+          if (prev.length === 0) return prev;
+          const next = [...prev];
+          const lastIdx = next.length - 1;
+          if (next[lastIdx].role === 'assistant') {
+            next[lastIdx] = { ...next[lastIdx], content: full };
+          }
+          return next;
+        });
+        await new Promise(resolve => setTimeout(resolve, 20)); // Simulate delay
+      }
+      
+      return full;
+    }
+
+    // Original Supabase code (unchanged)
     const url = functionUrl('chat_rag');
     const res = await fetch(url, {
       method: 'POST',
@@ -364,7 +485,6 @@ export const Chat: React.FC = () => {
 
       // call edge function (stream) — include messages array expected by the function
       const final = await callEdgeFunctionStream({
-        document_id: selectedDocument,
         session_id: activeSession,
         messages: buildLegacyMessages(text), // <— IMPORTANT
       });
@@ -421,7 +541,6 @@ export const Chat: React.FC = () => {
       ]);
 
       const final = await callEdgeFunctionStream({
-        document_id: selectedDocument,
         session_id: activeSession,
         messages: buildLegacyMessages(question), // <— IMPORTANT
       });
