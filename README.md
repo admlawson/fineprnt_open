@@ -1,4 +1,4 @@
-# Fineprnt Open
+# Fineprnt
 
 **Fineprnt** is an open-source project making legal and business documents accessible, transparent, and easy to understand.  
 
