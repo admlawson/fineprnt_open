@@ -99,7 +99,7 @@ The document processing pipeline is powered by several Edge Functions in `supaba
 ### No Authentication Required
 This open-source version runs without user authentication, making it perfect for personal use, demos, or small teams. All documents and chat sessions are shared across all users.
 
-### Installation
+### Quick Setup
 
 1. **Clone the repository**
    ```bash
@@ -113,28 +113,181 @@ This open-source version runs without user authentication, making it perfect for
    ```
 
 3. **Set up Supabase**
-   - Create a new Supabase project
-   - Run the migrations in `supabase/migrations/`
-   - Deploy the Edge Functions
-   - **Important**: The database is configured for no authentication - all data is shared
+   - Create a new Supabase project at [supabase.com](https://supabase.com)
+   - Go to your project dashboard → Settings → API
+   - Copy your Project URL and anon public key
+   - Install the Supabase CLI: `npm install -g supabase`
+   - Link your project: `supabase link --project-ref your-project-id`
+   - Run the database migration: `supabase db push`
+   - Deploy Edge Functions: `supabase functions deploy`
 
 4. **Configure environment variables**
-   - Copy `env.example` to `.env.local`
-   - Set up your Supabase project URL and keys
-   - Set up your OpenAI API key
-   - Set up your Mistral AI API key
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` and add your Supabase credentials:
+   ```env
+   VITE_SUPABASE_URL="https://your-project-id.supabase.co"
+   VITE_SUPABASE_ANON_KEY="your-supabase-anon-key"
+   ```
 
-5. **Run locally**
+5. **Set up API keys in Supabase**
+   - Go to your Supabase project → Settings → Edge Functions
+   - Add the following secrets:
+     ```bash
+     supabase secrets set OPENAI_API_KEY="your-openai-api-key"
+     supabase secrets set MISTRAL_API_KEY="your-mistral-api-key"
+     ```
+   - Optional: Add Resend API key for feedback/support emails:
+     ```bash
+     supabase secrets set RESEND_API_KEY="your-resend-api-key"
+     ```
+
+6. **Run locally**
    ```bash
    npm run dev
    ```
    The app will be available at `http://localhost:5173` - start uploading documents immediately!
 
-6. **Build for production**
+### Detailed Setup Instructions
+
+#### 1. Supabase Project Setup
+
+1. **Create a new Supabase project**
+   - Go to [supabase.com](https://supabase.com) and create a new project
+   - Choose a region close to your users
+   - Wait for the project to be fully provisioned
+
+2. **Get your project credentials**
+   - Go to Settings → API
+   - Copy your Project URL (e.g., `https://xyzabc123.supabase.co`)
+   - Copy your anon public key (starts with `eyJ...`)
+
+3. **Install and configure Supabase CLI**
    ```bash
-   npm run build
-   npm run preview
+   npm install -g supabase
+   supabase login
+   supabase link --project-ref your-project-id
    ```
+
+#### 2. Database Setup
+
+1. **Run the database migration**
+   ```bash
+   supabase db push
+   ```
+   This will create all necessary tables, indexes, and functions.
+
+2. **Verify the setup**
+   - Go to your Supabase dashboard → Table Editor
+   - You should see tables: `documents`, `document_vectors`, `chat_sessions`, etc.
+   - Go to Database → Extensions and verify `vector` extension is enabled
+
+#### 3. Edge Functions Setup
+
+1. **Deploy all Edge Functions**
+   ```bash
+   supabase functions deploy
+   ```
+
+2. **Set up API keys as secrets**
+   ```bash
+   # Required: OpenAI API key for embeddings
+   supabase secrets set OPENAI_API_KEY="sk-..."
+   
+   # Required: Mistral API key for OCR
+   supabase secrets set MISTRAL_API_KEY="..."
+   
+   # Optional: Resend API key for email functionality
+   supabase secrets set RESEND_API_KEY="re_..."
+   ```
+
+#### 4. Storage Setup
+
+1. **Create storage bucket**
+   - Go to Storage in your Supabase dashboard
+   - The migration should have created a `documents` bucket
+   - If not, create it manually with public access disabled
+
+2. **Configure storage policies**
+   - The migration includes storage policies
+   - Verify they're working by checking Storage → Policies
+
+#### 5. Frontend Configuration
+
+1. **Create environment file**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Update environment variables**
+   ```env
+   VITE_SUPABASE_URL="https://your-project-id.supabase.co"
+   VITE_SUPABASE_ANON_KEY="your-anon-key"
+   VITE_APP_BASE_URL="http://localhost:5173"
+   ```
+
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+### Production Deployment
+
+#### Frontend (Vercel)
+
+1. **Deploy to Vercel**
+   ```bash
+   npm install -g vercel
+   vercel
+   ```
+
+2. **Set environment variables in Vercel**
+   - Go to your Vercel project settings
+   - Add the same environment variables as your `.env` file
+   - Update `VITE_APP_BASE_URL` to your production domain
+
+#### Backend (Supabase)
+
+1. **Your Supabase project is already production-ready**
+   - Edge Functions are deployed
+   - Database is set up
+   - Storage is configured
+
+2. **Optional: Custom domain**
+   - Go to Supabase Settings → Custom Domains
+   - Add your custom domain for Edge Functions
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **"Missing authorization header" errors**
+   - Ensure your `VITE_SUPABASE_ANON_KEY` is correct
+   - Check that the key starts with `eyJ`
+
+2. **"OpenAI embeddings failed" errors**
+   - Verify your `OPENAI_API_KEY` is set in Supabase secrets
+   - Check that the key starts with `sk-`
+
+3. **"Mistral API error" errors**
+   - Verify your `MISTRAL_API_KEY` is set in Supabase secrets
+   - Ensure you have credits in your Mistral account
+
+4. **Database connection issues**
+   - Verify your `VITE_SUPABASE_URL` is correct
+   - Check that your Supabase project is active
+
+5. **Storage upload failures**
+   - Ensure the `documents` storage bucket exists
+   - Check storage policies are correctly configured
+
+#### Getting Help
+
+- Check the [Supabase documentation](https://supabase.com/docs)
+- Review [OpenAI API documentation](https://platform.openai.com/docs)
+- Check [Mistral AI documentation](https://docs.mistral.ai/)
+- Open an issue on [GitHub](https://github.com/admlawson/fineprnt_open/issues)
 
 ## Contributing
 
