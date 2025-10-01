@@ -1,0 +1,18 @@
+# Cursor ignore file
+# Override default exclusions to show important files
+
+# Show environment example file
+!.env.example
+
+# Keep sensitive files hidden
+.env
+.env.local
+.env.*.local
+
+# Keep build outputs hidden
+dist/
+node_modules/
+
+# Keep IDE files hidden
+.vscode/
+.idea/
