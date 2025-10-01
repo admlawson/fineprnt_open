@@ -1,22 +1,63 @@
-# Fineprnt
+# Fineprnt Open
 
-**Fineprnt** is an open-source AI-powered platform that makes legal documents accessible, transparent, and easy to understand. Never be stuck or confused by the fine print again.
+**Fineprnt** is an open-source project making legal and business documents accessible, transparent, and easy to understand.  
 
-Upload any document, ask questions, and get precise answers with citations. Our unique two-lane approach separates document-specific facts from general guidance, ensuring you get accurate information grounded in your actual contract while receiving helpful context when needed.
+Contracts, leases, job offers, medical bills — they’re written to confuse you. Fineprnt flips the power back: upload any file, ask in plain English, and get answers backed by **receipts** (citations).
 
-The application combines a React frontend, Supabase backend, Mistral and OpenAI models to deliver document chat with retrieval-augmented generation (RAG) that's designed specifically for legal and business document analysis.
+---
+
+## Why Fineprnt?
+
+- **Because the fine print is where people get trapped.**  
+- **Because AI shouldn’t be a black box.**  
+- **Because clarity is a right, not a privilege.**
+
+Fineprnt is open, transparent, and community-driven. No walled gardens. No pay-to-play. Everyone should be able to read what they sign.
+
+---
+
+## How It Works
+
+- **Upload any document** → PDFs, scans, or images.  
+- **Ask questions in plain English** → “When is rent due?” “What fees apply?”  
+- **Get answers with receipts** → Page + section citations so you can trust every response.  
+
+Behind the scenes, Fineprnt uses **retrieval-augmented generation (RAG)** to separate:
+- **Facts from your document** (with citations)  
+- **Helpful general guidance** (context, not hallucination)  
+
+This “two-lane” approach makes Fineprnt uniquely reliable.
+
+---
+
+## Our Approach to Market (GTM)
+
+Fineprnt is not a SaaS tool hidden behind a paywall. It’s three things at once:
+
+1. **🛠️ Open Source Project** - Free, transparent, and community-owned. Self-host it, fork it, improve it.  
+2. **📦 SDK (coming soon)** - Use Fineprnt’s parsing, OCR, and RAG pipeline in your own apps.  
+3. **☁️ Fineprnt Cloud (coming soon)** - For those who just want to upload and ask without touching code. Hosted, secure, and always in sync with the open repo.  
+
+---
 
 ## Features
 
-- **Two-Lane RAG Approach** – Our unique system separates document-specific facts from general guidance, ensuring accurate citations while providing helpful context
-- **Document Processing** – Upload any document (PDF, images, etc.) with automatic OCR, text extraction, and semantic chunking
-- **AI Chat Assistant** – Ask questions about your documents and get precise answers with citations and page references
-- **Smart Search** – Hybrid search combining semantic similarity and keyword matching for accurate results
-- **Contract Type Detection** – Automatically identifies document types (real estate, employment, medical, etc.) for specialized analysis
-- **No Authentication Required** – Simple setup without user accounts or complex authentication
-- **Real-time Processing** – Monitor document processing status with detailed progress tracking
-- **Responsive Design** – Modern UI built with Tailwind CSS and shadcn/ui components
-- **Dark/Light Themes** – Automatic theme switching with system preference detection
+- **Two-Lane RAG** → Separate contract facts vs. general context  
+- **Receipts, not guesses** → Every claim backed by citations  
+- **Document type detection** → Leases, offers, medical bills, and more  
+- **Automatic OCR** → Scans and images processed into searchable text  
+- **Open Source by default** → Transparent pipeline, free forever  
+
+---
+
+## Roadmap
+
+- [ ] SDK for developers (drop-in parsing + RAG)  
+- [ ] Fineprnt Cloud (hosted version)  
+- [ ] More specialized models for different contract types  
+- [ ] Multi-document support  
+
+---
 
 ## Tech Stack
 

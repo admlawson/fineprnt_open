@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { HelmetProvider } from "react-helmet-async";
 import { Landing } from "./pages/Landing";
 import { Chat } from "./pages/Chat";
 import { Documents } from "./pages/Documents";
@@ -18,33 +19,35 @@ const queryClient = new QueryClient();
 
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Landing />} />
-            <Route path="/termsofservice" element={<TermsOfService />} />
-            <Route path="/privacypolicy" element={<PrivacyPolicy />} />
-            
-            {/* App routes */}
-            <Route path="/app" element={<AppLayout />}>
-              <Route index element={<Navigate to="/app/documents" replace />} />
-              <Route path="chat" element={<Chat />} />
-              <Route path="documents" element={<Documents />} />
-            </Route>
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <ScrollToTop />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Landing />} />
+              <Route path="/termsofservice" element={<TermsOfService />} />
+              <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+              
+              {/* App routes */}
+              <Route path="/app" element={<AppLayout />}>
+                <Route index element={<Navigate to="/app/documents" replace />} />
+                <Route path="chat" element={<Chat />} />
+                <Route path="documents" element={<Documents />} />
+              </Route>
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
